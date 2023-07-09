@@ -1,0 +1,95 @@
+name: build
+on:
+  push:
+    branches:
+      - main
+      - dev
+    tags:
+      - '**'
+    paths-ignore:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'documentation/**'
+      - 'scripts/**'
+      - 'README**'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'documentation/**'
+      - 'scripts/**'
+      - 'README**'
+  release:
+    types: [published]
+jobs:
+  build:
+    runs-on: ${{ matrix.runs-on }}
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false # don't abort if one of the build failse
+      matrix:
+        include:
+        - name: osx-universal
+          runs-on: macos-12-xl
+          qt-version: '6.2.4'
+          qt-type: 'dynamic'
+          qt-arch: 'x86_64;arm64'
+          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
+    env:
+      QT_DOWNLOAD_BASE_URL: 'https://files.jacktrip.org/contrib'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: set version string for artifacts
+        shell: bash
+        id: set-version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=${GITHUB_SHA::7}
+          fi
+          NAME="qt-${{ matrix.qt-version }}-${{ matrix.qt-type }}-${{ matrix.name }}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "name=$NAME" >> $GITHUB_OUTPUT
+          echo "stamp=$(date '+%Y-%m-%d')" >> $GITHUB_OUTPUT # set timestamp for cache
+      - name: OSX - install dependencies
+        if: runner.os == 'macOS'
+        env:
+          HOMEBREW_NO_ANALYTICS: 1
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: |
+          brew install ninja
+          if [[ -n "${{ matrix.xcode-directory }}" ]]; then
+            sudo xcode-select -s ${{ matrix.xcode-directory }}
+          fi
+      - name: Unix - build Qt from source
+        env:
+          QT_BUILD_ARCH: ${{ matrix.qt-arch }}
+        run: |
+          sudo chmod a+rwx /opt
+          mkdir -p /opt/qtbuild
+          if [[ "${{ matrix.qt-type }}" == "dynamic" ]]; then ./qtbuild.sh -dynamic ${{ matrix.qt-version }}; else ./qtbuild.sh ${{ matrix.qt-version }}; fi
+      - name: compress the build directory
+        shell: bash
+        run: |
+          BASENAME="qt-${{ matrix.qt-version }}-${{ matrix.qt-type }}"
+          BINFILE="$BASENAME-${{ matrix.name }}"
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            BINFILE="$BINFILE.zip"
+            cd c:/qt/
+            7z a $GITHUB_WORKSPACE/$BINFILE -tzip ${BASENAME}
+          else
+            BINFILE="$BINFILE.tar.gz"
+            tar -C /opt -czf $GITHUB_WORKSPACE/$BINFILE $BASENAME
+          fi
+          echo "BASENAME=$BASENAME" >> $GITHUB_ENV
+          echo "BINFILE=$BINFILE" >> $GITHUB_ENV
+      - name: upload the build
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.BASENAME }}
+          path: ${{ env.BINFILE }}
