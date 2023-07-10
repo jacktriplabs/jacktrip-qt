@@ -1,15 +1,15 @@
-# JackTrip Scripts to Build Qt
+# Scripts to Build Qt for JackTrip
 
 Copyright (c) 2023 JackTrip Labs, Inc.
 See [MIT License](LICENSE)
 
-These are opinionated scripts for building Qt with only the requirements needed to build [JackTrip](https://github.com/jacktrip/jacktrip).
+These are opinionated scripts to build Qt with only the features required by [JackTrip](https://github.com/jacktrip/jacktrip).
 
 ## qtbuild.sh (for Unix)
 
 `./qtbuild.sh <VERSION>`
 
-Creates static build of QT in `/opt/qt-<VERSION>-static`
+Creates static build of Qt in `/opt/qt-<VERSION>-static`
 
 Supports:
 * Qt5
@@ -20,7 +20,7 @@ Supports:
 
 `./qtbuild.sh -dynamic <VERSION>`
 
-Creates dynamic build of QT in `/opt/qt-<VERSION>-dynamic`
+Creates dynamic build of Qt in `/opt/qt-<VERSION>-dynamic`
 
 Supports:
 * Qt5
@@ -41,11 +41,11 @@ For OSX, use environment variable `QT_BUILD_ARCH` to specify Intel or ARM archit
 
 `qtbuild.bat <VERSION>`
 
-Creates static build of QT in `c:\qt\qt-<VERSION>-static`
+Creates static build of Qt in `c:\qt\qt-<VERSION>-static`
 
 `qtbuild.bat <VERSION>`
 
-Creates dynamic build of QT in `c:\qt\qt-<VERSION>-dynamic`
+Creates dynamic build of Qt in `c:\qt\qt-<VERSION>-dynamic`
 
 ### Before you build...
 

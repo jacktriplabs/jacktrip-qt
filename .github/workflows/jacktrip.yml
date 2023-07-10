@@ -29,11 +29,35 @@ jobs:
       fail-fast: false # don't abort if one of the build failse
       matrix:
         include:
-        - name: osx-universal
+        - name: qt-5.15.10-static-osx.tar.gz
+          runs-on: macos-12-xl
+          qt-version: '5.15.10'
+          qt-type: 'dynamic'
+          qt-arch: 'x86_64 arm64'
+          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
+        - name: qt-5.15.10-dynamic-osx.tar.gz
+          runs-on: macos-12-xl
+          qt-version: '5.15.10'
+          qt-type: 'dynamic'
+          qt-arch: 'x86_64 arm64'
+          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
+        - name: qt-6.2.4-static-osx.tar.gz
+          runs-on: macos-12-xl
+          qt-version: '6.2.4'
+          qt-type: 'static'
+          qt-arch: 'x86_64;arm64'
+          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
+        - name: qt-6.2.4-dynamic-osx.tar.gz
           runs-on: macos-12-xl
           qt-version: '6.2.4'
           qt-type: 'dynamic'
           qt-arch: 'x86_64;arm64'
+          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
+        - name: qt-6.2.4-dynamic-osx-x86_64.tar.gz
+          runs-on: macos-12-xl
+          qt-version: '6.2.4'
+          qt-type: 'dynamic'
+          qt-arch: 'x86_64'
           xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
     env:
       QT_DOWNLOAD_BASE_URL: 'https://files.jacktrip.org/contrib'
@@ -72,24 +96,22 @@ jobs:
         run: |
           sudo chmod a+rwx /opt
           mkdir -p /opt/qtbuild
+          brew list
+          df
           if [[ "${{ matrix.qt-type }}" == "dynamic" ]]; then ./qtbuild.sh -dynamic ${{ matrix.qt-version }}; else ./qtbuild.sh ${{ matrix.qt-version }}; fi
       - name: compress the build directory
         shell: bash
         run: |
           BASENAME="qt-${{ matrix.qt-version }}-${{ matrix.qt-type }}"
-          BINFILE="$BASENAME-${{ matrix.name }}"
           if [[ "${{ runner.os }}" == "Windows" ]]; then
-            BINFILE="$BINFILE.zip"
             cd c:/qt/
-            7z a $GITHUB_WORKSPACE/$BINFILE -tzip ${BASENAME}
+            7z a "$GITHUB_WORKSPACE/${{ matrix.name }}" -tzip $BASENAME
           else
-            BINFILE="$BINFILE.tar.gz"
-            tar -C /opt -czf $GITHUB_WORKSPACE/$BINFILE $BASENAME
+            cd /opt
+            tar -czf "$GITHUB_WORKSPACE/${{ matrix.name }}" $BASENAME
           fi
-          echo "BASENAME=$BASENAME" >> $GITHUB_ENV
-          echo "BINFILE=$BINFILE" >> $GITHUB_ENV
       - name: upload the build
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.BASENAME }}
-          path: ${{ env.BINFILE }}
+          name: ${{ matrix.name }}
+          path: ${{ matrix.name }}
