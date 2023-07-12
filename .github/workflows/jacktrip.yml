@@ -63,18 +63,18 @@ jobs:
           runs-on: ubuntu-20.04
           qt-version: '6.2.4'
           qt-type: 'static'
-#        - name: qt-5.15.10-static-osx
-#          runs-on: macos-12
-#          qt-version: '5.15.10'
-#          qt-type: 'dynamic'
-#          qt-arch: 'x86_64 arm64'
-#          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
-        - name: qt-6.2.4-static-osx
-          runs-on: macos-12-xl
-          qt-version: '6.2.4'
+        - name: qt-5.15.10-static-osx
+          runs-on: macos-12
+          qt-version: '5.15.10'
           qt-type: 'static'
-          qt-arch: 'x86_64;arm64'
+          qt-arch: 'x86_64 arm64'
           xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
+#        - name: qt-6.2.4-static-osx
+#          runs-on: macos-12
+#          qt-version: '6.2.4'
+#          qt-type: 'static'
+#          qt-arch: 'x86_64;arm64'
+#          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
 #        - name: qt-5.15.10-dynamic-osx
 #          runs-on: macos-12-xl
 #          qt-version: '5.15.10'
@@ -87,12 +87,10 @@ jobs:
 #          qt-type: 'dynamic'
 #          qt-arch: 'x86_64;arm64'
 #          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
-#        - name: qt-6.2.4-dynamic-osx-x86_64
-#          runs-on: macos-12-xl
-#          qt-version: '6.2.4'
-#          qt-type: 'dynamic'
-#          qt-arch: 'x86_64'
-#          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
+        - name: qt-5.15.10-static-win
+          runs-on: windows-2019
+          qt-version: '5.15.10'
+          qt-type: 'static'
     permissions:
       contents: "read"
       id-token: "write"
@@ -122,19 +120,33 @@ jobs:
           if [[ -n "${{ matrix.xcode-directory }}" ]]; then
             sudo xcode-select -s ${{ matrix.xcode-directory }}
           fi
-          if [[ "${{ needs.preflight.outputs.upload_artifact }}" == "true" ]]; then
-            curl -L $GOOGLE_SDK_URL_OSX -o google-cloud-sdk.tar.gz
-            tar -xzf google-cloud-sdk.tar.gz
-            ./google-cloud-sdk/install.sh --quiet
-            echo "$GITHUB_WORKSPACE/google-cloud-sdk/bin" >> $GITHUB_PATH
-          fi
+      - name: Windows - install dependencies
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          choco install pkgconfiglite nasm --no-progress
+          echo "c:\Program Files\NASM" >> $GITHUB_PATH
+      - name: Windows - setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
       - name: Unix - build Qt from source
+        if: runner.os != 'Windows'
         env:
           QT_BUILD_ARCH: ${{ matrix.qt-arch }}
         run: |
           sudo chmod a+rwx /opt
           mkdir -p /opt/qtbuild
           if [[ "${{ matrix.qt-type }}" == "dynamic" ]]; then ./qtbuild.sh -dynamic ${{ matrix.qt-version }}; else ./qtbuild.sh ${{ matrix.qt-version }}; fi
+      - name: Windows - build Qt from source
+        if: runner.os == 'Windows'
+        env:
+          QT_BUILD_ARCH: ${{ matrix.qt-arch }}
+        run: |
+          mkdir C:\qt
+          mkdir C:\qt\build
+          copy qtbuild.bat c:\qt\build\qtbuild.bat
+          cd c:\qt\build
+          if ( "${{ matrix.qt-type }}" -eq "dynamic" ) { c:\qt\build\qtbuild.bat -dynamic ${{ matrix.qt-version }} } else { c:\qt\build\qtbuild.bat ${{ matrix.qt-version }} }
       - name: Compress the build directory
         shell: bash
         id: create-binary
@@ -142,12 +154,12 @@ jobs:
           BASENAME="qt-${{ matrix.qt-version }}-${{ matrix.qt-type }}"
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             cd c:/qt/
-            EXT=".zip"
+            EXT="zip"
             BINFILE="${{ matrix.name }}-${{ needs.preflight.outputs.commit }}.zip"
             7z a "$GITHUB_WORKSPACE/$BINFILE" -tzip $BASENAME
           else
             cd /opt
-            EXT=".tar.gz"
+            EXT="tar.gz"
             BINFILE="${{ matrix.name }}-${{ needs.preflight.outputs.commit }}.tar.gz"
             tar -czf "$GITHUB_WORKSPACE/$BINFILE" $BASENAME
           fi
@@ -165,12 +177,21 @@ jobs:
           workload_identity_provider: ${{ env.GCP_IDP }}
           service_account: ${{ env.GCS_SVC_ACCT }}
           create_credentials_file: true
+      - name: Setup SDK for GCS
+        uses: 'google-github-actions/setup-gcloud@v1'
+        with:
+          version: '>= 363.0.0'
       - name: Upload build artifact to GCS
         if: needs.preflight.outputs.upload_artifact == 'true'
+        shell: bash
         run: |
+          ls -la "${{ steps.create-binary.outputs.filename }}"
+          # this feature seems to produce permission denied errors on osx and linux runners
+          gcloud config set storage/parallel_composite_upload_enabled False
           gcloud storage cp "${{ steps.create-binary.outputs.filename }}" gs://files.jacktrip.org/contrib/qt
       - name: Promote build artifact
         if: needs.preflight.outputs.upload_artifact == 'true' && needs.preflight.outputs.promote_artifact == 'true'
+        shell: bash
         run: |
           BINFILE="${{ matrix.name }}.${{ steps.create-binary.outputs.ext }}"
           cp "${{ steps.create-binary.outputs.filename }}" "$BINFILE"
