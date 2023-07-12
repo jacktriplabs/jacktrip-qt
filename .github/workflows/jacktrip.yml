@@ -140,7 +140,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          choco install pkgconfiglite nasm --no-progress
+          choco install pkgconfiglite winflexbison3 gperf nodejs-lts python2 python3 nasm StrawberryPerl --no-progress
           echo "c:\Program Files\NASM" >> $GITHUB_PATH
       - name: Windows - setup MSVC
         uses: ilammy/msvc-dev-cmd@v1

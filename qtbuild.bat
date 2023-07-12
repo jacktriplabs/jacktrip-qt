@@ -118,7 +118,7 @@ if NOT exist %QT_SRC_PATH%\ (
     )
     Set QT_SRC_URL=https://download.qt.io/archive/qt/%QT_MAJOR_VERSION%.%QT_MINOR_VERSION%/%QT_FULL_VERSION%/single/!QT_ARCHIVE_BASE_NAME!src-%QT_FULL_VERSION%.zip
     curl -L !QT_SRC_URL! -o qt.zip
-    unzip qt.zip
+    unzip -q qt.zip
 )
 
 :: prepare qt build target
