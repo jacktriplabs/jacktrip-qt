@@ -58,6 +58,9 @@ jobs:
     strategy:
       fail-fast: false # don't abort if one of the build failse
       matrix:
+        exclude:
+          - runs-on: ${{ needs.preflight.outputs.upload_artifact == 'false' && 'macos-12-xl' || 'none' }}
+          - runs-on: ${{ needs.preflight.outputs.upload_artifact == 'false' && 'windows-2019-8core' || 'none' }}
         include:
         - name: qt-5.15.10-static-linux
           runs-on: ubuntu-20.04

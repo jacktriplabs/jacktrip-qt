@@ -198,12 +198,12 @@ if [[ "$OS" == "linux" ]]; then
         "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS
     elif [[ $QT_MAJOR_VERSION -eq 5 ]]; then
         # static link openssl (no OPENSSL_ROOT_DIR)
-        echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_LIBS=\"$OPENSSL_BUILD_PATH/lib64/libssl.a $OPENSSL_BUILD_PATH/lib64/libcrypto.a\" -I \"$OPENSSL_BUILD_PATH/include\""
-        "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_LIBS="$OPENSSL_BUILD_PATH/lib64/libssl.a $OPENSSL_BUILD_PATH/lib64/libcrypto.a" -I "$OPENSSL_BUILD_PATH/include"
+        echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_LIBS=\"$QT_BUILD_PATH/lib64/libssl.a $QT_BUILD_PATH/lib64/libcrypto.a\" -I \"$QT_BUILD_PATH/include\""
+        "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_LIBS="$QT_BUILD_PATH/lib64/libssl.a $QT_BUILD_PATH/lib64/libcrypto.a" -I "$QT_BUILD_PATH/include"
     else
         # static link openssl (with OPENSSL_ROOT_DIR)
-        echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_ROOT_DIR=\"$OPENSSL_BUILD_PATH\" OPENSSL_LIBS=\"$OPENSSL_BUILD_PATH/lib64/libssl.a $OPENSSL_BUILD_PATH/lib64/libcrypto.a\" -I \"$OPENSSL_BUILD_PATH/include\""
-        "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_ROOT_DIR="$OPENSSL_BUILD_PATH" OPENSSL_LIBS="$OPENSSL_BUILD_PATH/lib64/libssl.a $OPENSSL_BUILD_PATH/lib64/libcrypto.a" -I "$OPENSSL_BUILD_PATH/include"
+        echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_ROOT_DIR=\"$QT_BUILD_PATH\" OPENSSL_LIBS=\"$QT_BUILD_PATH/lib64/libssl.a $QT_BUILD_PATH/lib64/libcrypto.a\" -I \"$QT_BUILD_PATH/include\""
+        "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_ROOT_DIR="$QT_BUILD_PATH" OPENSSL_LIBS="$QT_BUILD_PATH/lib64/libssl.a $QT_BUILD_PATH/lib64/libcrypto.a" -I "$QT_BUILD_PATH/include"
     fi
 fi
 
@@ -266,8 +266,8 @@ if [[ "$OS" == "windows" ]]; then
         # help cmake find the packages we've installed using vcpkg
         CMAKE_PREFIX_PATH=$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET
         echo "QT Configure command"
-        echo "\"$QT_SRC_PATH/configure.bat\" -prefix \"$QT_BUILD_PATH\" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L \"$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/lib\" -I \"$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/include\" OPENSSL_ROOT_DIR=\"$OPENSSL_BUILD_PATH\" OPENSSL_LIBS=\"-llibssl -llibcrypto -lcrypt32 -lws2_32\""
-        "$QT_SRC_PATH/configure.bat" -prefix "$QT_BUILD_PATH" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L "$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/lib" -I "$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/include" OPENSSL_ROOT_DIR="$OPENSSL_BUILD_PATH" OPENSSL_LIBS="-llibssl -llibcrypto -lcrypt32 -lws2_32"
+        echo "\"$QT_SRC_PATH/configure.bat\" -prefix \"$QT_BUILD_PATH\" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L \"$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/lib\" -I \"$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/include\" OPENSSL_ROOT_DIR=\"$QT_BUILD_PATH\" OPENSSL_LIBS=\"-llibssl -llibcrypto -lcrypt32 -lws2_32\""
+        "$QT_SRC_PATH/configure.bat" -prefix "$QT_BUILD_PATH" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L "$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/lib" -I "$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/include" OPENSSL_ROOT_DIR="$QT_BUILD_PATH" OPENSSL_LIBS="-llibssl -llibcrypto -lcrypt32 -lws2_32"
     fi
 fi
 
