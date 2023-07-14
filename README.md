@@ -22,8 +22,8 @@ Windows MSVC (64-bit)
 * [Qt 5.15.10 Dynamic](https://files.jacktrip.org/contrib/qt/qt-5.15.10-dynamic-win.zip)
 
 Linux (64-bit)
-* [Qt 6.2.4 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.4-static-osx.tar.gz)
-* [Qt 5.15.10 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.10-static-osx.tar.gz)
+* [Qt 6.2.4 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.4-static-linux.tar.gz)
+* [Qt 5.15.10 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.10-static-linux.tar.gz)
 
 ## qtbuild.sh (for Unix)
 

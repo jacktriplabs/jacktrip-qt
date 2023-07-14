@@ -155,27 +155,16 @@ if NOT exist %OPENSSL_BUILD_PATH%\ (
 )
 
 :: copy static openssl into qt build
-mkdir "%QT_BUILD_PATH%/lib"
-mkdir "%QT_BUILD_PATH%/include"
-xcopy "%OPENSSL_BUILD_PATH%/lib" %QT_BUILD_PATH%/lib
-xcopy "%OPENSSL_BUILD_PATH%/include/openssl" "%QT_BUILD_PATH%/include"
-
-:: build for Windows
-if %QT_MAJOR_VERSION% EQU 5 (
-    :: help pkgconfig find the packages we've installed using vcpkg
-    Set PKG_CONFIG_PATH=%VCPKG_INSTALLATION_ROOT:\=/%/installed/%VCPKG_TRIPLET%/lib/pkgconfig
-) else (
-    :: help cmake find the packages we've installed using vcpkg
-    Set CMAKE_PREFIX_PATH=%VCPKG_INSTALLATION_ROOT:\=/%/installed/%VCPKG_TRIPLET%
-)
+xcopy /S "%OPENSSL_BUILD_PATH%\lib" "%QT_BUILD_PATH%\lib\"
+xcopy /S "%OPENSSL_BUILD_PATH%\include" "%QT_BUILD_PATH%\include\"
 
 echo QT Configure command
 if %QT_MAJOR_VERSION% EQU 5 (
-    echo "%QT_SRC_PATH:\=/%/configure.bat" -prefix "%QT_BUILD_PATH:\=/%" %QT_WINDOWS_OPTIONS% %QT_CONFIGURE_OPTIONS% -L "%VCPKG_INSTALLATION_ROOT:\=/%/installed/%VCPKG_TRIPLET%/lib" -I "%VCPKG_INSTALLATION_ROOT:\=/%/installed/%VCPKG_TRIPLET%/include" -I "%QT_BUILD_PATH:\=/%/include" -L "%QT_BUILD_PATH:\=/%/lib" OPENSSL_LIBS="%QT_BUILD_PATH:\=/%/lib/libcrypto.lib %QT_BUILD_PATH:\=/%/lib/libssl.lib -lAdvapi32 -lUser32 -lcrypt32 -lws2_32"
-    call "%QT_SRC_PATH:\=/%/configure.bat" -prefix "%QT_BUILD_PATH:\=/%" %QT_WINDOWS_OPTIONS% %QT_CONFIGURE_OPTIONS% -L "%VCPKG_INSTALLATION_ROOT:\=/%/installed/%VCPKG_TRIPLET%/lib" -I "%VCPKG_INSTALLATION_ROOT:\=/%/installed/%VCPKG_TRIPLET%/include" -I "%QT_BUILD_PATH:\=/%/include" -L "%QT_BUILD_PATH:\=/%/lib" OPENSSL_LIBS="%QT_BUILD_PATH:\=/%/lib/libcrypto.lib %QT_BUILD_PATH:\=/%/lib/libssl.lib -lAdvapi32 -lUser32 -lcrypt32 -lws2_32"
+    echo "%QT_SRC_PATH:\=/%/configure.bat" -prefix "%QT_BUILD_PATH:\=/%" %QT_WINDOWS_OPTIONS% %QT_CONFIGURE_OPTIONS% -I "%QT_BUILD_PATH:\=/%/include" -L "%QT_BUILD_PATH:\=/%/lib" OPENSSL_LIBS="%QT_BUILD_PATH:\=/%/lib/libcrypto.lib %QT_BUILD_PATH:\=/%/lib/libssl.lib -lAdvapi32 -lUser32 -lcrypt32 -lws2_32"
+    call "%QT_SRC_PATH:\=/%/configure.bat" -prefix "%QT_BUILD_PATH:\=/%" %QT_WINDOWS_OPTIONS% %QT_CONFIGURE_OPTIONS% -I "%QT_BUILD_PATH:\=/%/include" -L "%QT_BUILD_PATH:\=/%/lib" OPENSSL_LIBS="%QT_BUILD_PATH:\=/%/lib/libcrypto.lib %QT_BUILD_PATH:\=/%/lib/libssl.lib -lAdvapi32 -lUser32 -lcrypt32 -lws2_32"
 ) else (
-    echo "%QT_SRC_PATH:\=/%/configure.bat" -prefix "%QT_BUILD_PATH:\=/%" %QT_WINDOWS_OPTIONS% %QT_CONFIGURE_OPTIONS% -L "%VCPKG_INSTALLATION_ROOT:\=/%/installed/%VCPKG_TRIPLET%/lib" -I "%VCPKG_INSTALLATION_ROOT:\=/%/installed/%VCPKG_TRIPLET%/include" -I "%QT_BUILD_PATH:\=/%/include" -L "%QT_BUILD_PATH:\=/%/lib" OPENSSL_ROOT_DIR="%QT_BUILD_PATH:\=/%" OPENSSL_LIBS="%QT_BUILD_PATH:\=/%/lib/libcrypto.lib %QT_BUILD_PATH:\=/%/lib/libssl.lib -lAdvapi32 -lUser32 -lcrypt32 -lws2_32"
-    call "%QT_SRC_PATH:\=/%/configure.bat" -prefix "%QT_BUILD_PATH:\=/%" %QT_WINDOWS_OPTIONS% %QT_CONFIGURE_OPTIONS% -L "%VCPKG_INSTALLATION_ROOT:\=/%/installed/%VCPKG_TRIPLET%/lib" -I "%VCPKG_INSTALLATION_ROOT:\=/%/installed/%VCPKG_TRIPLET%/include" -I "%QT_BUILD_PATH:\=/%/include" -L "%QT_BUILD_PATH:\=/%/lib" OPENSSL_ROOT_DIR="%QT_BUILD_PATH:\=/%" OPENSSL_LIBS="%QT_BUILD_PATH:\=/%/lib/libcrypto.lib %QT_BUILD_PATH:\=/%/lib/libssl.lib -lAdvapi32 -lUser32 -lcrypt32 -lws2_32"
+    echo "%QT_SRC_PATH:\=/%/configure.bat" -prefix "%QT_BUILD_PATH:\=/%" %QT_WINDOWPTIONS% %QT_CONFIGURE_OPTIONS% -I "%QT_BUILD_PATH:\=/%/include" -L "%QT_BUILD_PATH:\=/%/lib" OPENSSL_ROOT_DIR="%QT_BUILD_PATH:\=/%" OPENSSL_LIBS="%QT_BUILD_PATH:\=/%/lib/libcrypto.lib %QT_BUILD_PATH:\=/%/lib/libssl.lib -lAdvapi32 -lUser32 -lcrypt32 -lws2_32"
+    call "%QT_SRC_PATH:\=/%/configure.bat" -prefix "%QT_BUILD_PATH:\=/%" %QT_WINDOWS_OPTIONS% %QT_CONFIGURE_OPTIONS% -I "%QT_BUILD_PATH:\=/%/include" -L "%QT_BUILD_PATH:\=/%/lib" OPENSSL_ROOT_DIR="%QT_BUILD_PATH:\=/%" OPENSSL_LIBS="%QT_BUILD_PATH:\=/%/lib/libcrypto.lib %QT_BUILD_PATH:\=/%/lib/libssl.lib -lAdvapi32 -lUser32 -lcrypt32 -lws2_32"
 )
 if %ERRORLEVEL% NEQ 0 EXIT /B 0
 

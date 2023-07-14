@@ -257,17 +257,13 @@ fi
 if [[ "$OS" == "windows" ]]; then
     if [[ $QT_MAJOR_VERSION -eq 5 ]]; then
         QT_WINDOWS_OPTIONS="$QT_WINDOWS_OPTIONS -no-feature-d3d12"
-        # help pkgconfig find the packages we've installed using vcpkg
-        PKG_CONFIG_PATH=$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/lib/pkgconfig
         echo "QT Configure command"
-        echo "\"$QT_SRC_PATH/configure.bat\" -prefix \"$QT_BUILD_PATH\" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L \"$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/lib\" -I \"$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/include\" OPENSSL_LIBS=\"-llibssl -llibcrypto -lcrypt32 -lws2_32\""
-        "$QT_SRC_PATH/configure.bat" -prefix "$QT_BUILD_PATH" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L "$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/lib" -I "$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/include" OPENSSL_LIBS="-llibssl -llibcrypto -lcrypt32 -lws2_32"
+        echo "\"$QT_SRC_PATH/configure.bat\" -prefix \"$QT_BUILD_PATH\" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L \"$QT_BUILD_PATH/lib\" -I \"$QT_BUILD_PATH/include\" OPENSSL_LIBS=\"-llibssl -llibcrypto -lcrypt32 -lws2_32\""
+        "$QT_SRC_PATH/configure.bat" -prefix "$QT_BUILD_PATH" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L "$QT_BUILD_PATH/lib" -I "$QT_BUILD_PATH/include" OPENSSL_LIBS="-llibssl -llibcrypto -lcrypt32 -lws2_32"
     else
-        # help cmake find the packages we've installed using vcpkg
-        CMAKE_PREFIX_PATH=$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET
         echo "QT Configure command"
-        echo "\"$QT_SRC_PATH/configure.bat\" -prefix \"$QT_BUILD_PATH\" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L \"$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/lib\" -I \"$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/include\" OPENSSL_ROOT_DIR=\"$QT_BUILD_PATH\" OPENSSL_LIBS=\"-llibssl -llibcrypto -lcrypt32 -lws2_32\""
-        "$QT_SRC_PATH/configure.bat" -prefix "$QT_BUILD_PATH" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L "$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/lib" -I "$VCPKG_INSTALLATION_ROOT/installed/$VCPKG_TRIPLET/include" OPENSSL_ROOT_DIR="$QT_BUILD_PATH" OPENSSL_LIBS="-llibssl -llibcrypto -lcrypt32 -lws2_32"
+        echo "\"$QT_SRC_PATH/configure.bat\" -prefix \"$QT_BUILD_PATH\" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L \"$QT_BUILD_PATH/lib\" -I \"$QT_BUILD_PATH/include\" OPENSSL_ROOT_DIR=\"$QT_BUILD_PATH\" OPENSSL_LIBS=\"-llibssl -llibcrypto -lcrypt32 -lws2_32\""
+        "$QT_SRC_PATH/configure.bat" -prefix "$QT_BUILD_PATH" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L "$QT_BUILD_PATH/lib" -I "$QT_BUILD_PATH/include" OPENSSL_ROOT_DIR="$QT_BUILD_PATH" OPENSSL_LIBS="-llibssl -llibcrypto -lcrypt32 -lws2_32"
     fi
 fi
 
