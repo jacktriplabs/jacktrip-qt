@@ -5,6 +5,26 @@ See [MIT License](LICENSE)
 
 These are opinionated scripts to build Qt with only the features required by [JackTrip](https://github.com/jacktrip/jacktrip).
 
+Projects that use these artifacts must adhere to the terms & conditions of the [Qt License](https://www.qt.io/licensing/).
+
+## Download Links
+
+Mac OS X (Universal)
+* [Qt 6.2.4 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.4-static-osx.tar.gz)
+* [Qt 6.2.4 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.2.4-dynamic-osx.tar.gz)
+* [Qt 5.15.10 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.10-static-osx.tar.gz)
+* [Qt 5.15.10 Dynamic](https://files.jacktrip.org/contrib/qt/qt-5.15.10-dynamic-osx.tar.gz)
+
+Windows MSVC (64-bit)
+* [Qt 6.2.4 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.4-static-win.zip)
+* [Qt 6.2.4 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.2.4-dynamic-win.zip)
+* [Qt 5.15.10 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.10-static-win.zip)
+* [Qt 5.15.10 Dynamic](https://files.jacktrip.org/contrib/qt/qt-5.15.10-dynamic-win.zip)
+
+Linux (64-bit)
+* [Qt 6.2.4 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.4-static-osx.tar.gz)
+* [Qt 5.15.10 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.10-static-osx.tar.gz)
+
 ## qtbuild.sh (for Unix)
 
 `./qtbuild.sh <VERSION>`
@@ -62,7 +82,8 @@ Install chocolately:
 Install a few tasty packages:
 
 ```
-choco install -y git jom zip unzip cmake ninja meson pkgconfiglite
+choco install -y git jom zip unzip cmake ninja meson pkgconfiglite winflexbison3 gperf nodejs-lts python2 python3 nasm StrawberryPerl
+
 ```
 
 Go to Windows Search, type "Envir" and choose "Edit the system environment variables"
