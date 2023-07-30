@@ -108,10 +108,17 @@ Set QT_ARCHIVE_BASE_NAME=qt-everywhere-
 
 if NOT exist %QT_SRC_PATH%\ (
     echo Downloading qt-%QT_FULL_VERSION%
-    :: filename changed to qt-everywhere-opensource-src-<version> in Qt 5.15.3
+    :: filename changed to qt-everywhere-opensource-src-<version> in Qt 5.15.3 and Qt 6.2.5
     if %QT_MAJOR_VERSION% EQU 5 (
         if %QT_MINOR_VERSION% EQU 15 (
             if %QT_PATCH_VERSION% GTR 2 (
+                Set QT_ARCHIVE_BASE_NAME=%QT_ARCHIVE_BASE_NAME%opensource-
+            )
+        )
+    )
+    if %QT_MAJOR_VERSION% EQU 6 (
+        if %QT_MINOR_VERSION% EQU 2 (
+            if %QT_PATCH_VERSION% GTR 4 (
                 Set QT_ARCHIVE_BASE_NAME=%QT_ARCHIVE_BASE_NAME%opensource-
             )
         )

@@ -115,8 +115,11 @@ if [[ ! -d "$QT_SRC_PATH" ]]; then
     echo "Downloading qt-${QT_FULL_VERSION}"
 
     QT_ARCHIVE_BASE_NAME=qt-everywhere-
-    # filename changed to qt-everywhere-opensource-src-<version> in Qt 5.15.3
+    # filename changed to qt-everywhere-opensource-src-<version> in Qt 5.15.3 and 6.2.5
     if [[ $QT_MAJOR_VERSION -eq 5 && $QT_MINOR_VERSION -eq 15 && $QT_PATCH_VERSION -gt 2 ]]; then
+        QT_ARCHIVE_BASE_NAME=${QT_ARCHIVE_BASE_NAME}opensource-
+    fi
+    if [[ $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -eq 2 && $QT_PATCH_VERSION -gt 4 ]]; then
         QT_ARCHIVE_BASE_NAME=${QT_ARCHIVE_BASE_NAME}opensource-
     fi
     QT_SRC_URL="https://download.qt.io/archive/qt/$QT_MAJOR_VERSION.$QT_MINOR_VERSION/$QT_FULL_VERSION/single/${QT_ARCHIVE_BASE_NAME}src-$QT_FULL_VERSION.tar.xz"

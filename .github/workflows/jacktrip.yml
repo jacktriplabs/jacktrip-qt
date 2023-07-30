@@ -63,9 +63,9 @@ jobs:
           runs-on: ubuntu-20.04
           qt-version: '5.15.10'
           qt-type: 'static'
-        - name: qt-6.2.4-static-linux
+        - name: qt-6.2.5-static-linux
           runs-on: ubuntu-20.04
-          qt-version: '6.2.4'
+          qt-version: '6.2.5'
           qt-type: 'static'
         - name: qt-5.15.10-static-osx
           runs-on: macos-12
@@ -73,9 +73,9 @@ jobs:
           qt-type: 'static'
           qt-arch: 'x86_64 arm64'
           xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
-        - name: qt-6.2.4-static-osx
+        - name: qt-6.2.5-static-osx
           runs-on: macos-12
-          qt-version: '6.2.4'
+          qt-version: '6.2.5'
           qt-type: 'static'
           qt-arch: 'x86_64;arm64'
           xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
@@ -85,9 +85,9 @@ jobs:
           qt-type: 'dynamic'
           qt-arch: 'x86_64 arm64'
           xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
-        - name: qt-6.2.4-dynamic-osx
+        - name: qt-6.2.5-dynamic-osx
           runs-on: macos-12-xl
-          qt-version: '6.2.4'
+          qt-version: '6.2.5'
           qt-type: 'dynamic'
           qt-arch: 'x86_64;arm64'
           xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
@@ -95,17 +95,17 @@ jobs:
           runs-on: windows-2019
           qt-version: '5.15.10'
           qt-type: 'static'
-        - name: qt-6.2.4-static-win
+        - name: qt-6.2.5-static-win
           runs-on: windows-2019
-          qt-version: '6.2.4'
+          qt-version: '6.2.5'
           qt-type: 'static'
         - name: qt-5.15.10-dynamic-win
           runs-on: windows-2019-8core
           qt-version: '5.15.10'
           qt-type: 'dynamic'
-        - name: qt-6.2.4-dynamic-win
+        - name: qt-6.2.5-dynamic-win
           runs-on: windows-2019-8core
-          qt-version: '6.2.4'
+          qt-version: '6.2.5'
           qt-type: 'dynamic'
     permissions:
       contents: "read"
@@ -113,7 +113,7 @@ jobs:
     env:
       GCP_IDP: ${{ secrets.GCP_IDP }}
       GCS_SVC_ACCT: ${{ secrets.GCS_SVC_ACCT }}
-      GOOGLE_SDK_URL_OSX: 'https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-438.0.0-darwin-x86_64.tar.gz'
+      GCS_UPLOAD_DIR: 'gs://files.jacktrip.org/contrib/qt'
     steps:
       - uses: actions/checkout@v3
         with:
@@ -201,14 +201,13 @@ jobs:
         if: needs.preflight.outputs.upload_artifact == 'true'
         shell: bash
         run: |
-          ls -la "${{ steps.create-binary.outputs.filename }}"
           # this feature seems to produce permission denied errors on osx and linux runners
           gcloud config set storage/parallel_composite_upload_enabled False
-          gcloud storage cp "${{ steps.create-binary.outputs.filename }}" gs://files.jacktrip.org/contrib/qt
-      - name: Promote build artifact
-        if: needs.preflight.outputs.upload_artifact == 'true' && needs.preflight.outputs.promote_artifact == 'true'
-        shell: bash
-        run: |
-          BINFILE="${{ matrix.name }}.${{ steps.create-binary.outputs.ext }}"
-          cp "${{ steps.create-binary.outputs.filename }}" "$BINFILE"
-          gcloud storage cp "$BINFILE" gs://files.jacktrip.org/contrib/qt
+          BINFILE="${{ steps.create-binary.outputs.filename }}"
+          echo "Uploading $BINFILE to $GCS_UPLOAD_DIR"
+          gcloud storage cp "$BINFILE" "$GCS_UPLOAD_DIR"
+          if [[ "${{ needs.preflight.outputs.promote_artifact }}" == "true" ]]; then
+            PROMOFILE="${{ matrix.name }}.${{ steps.create-binary.outputs.ext }}"
+            echo "Promoting $BINFILE to $PROMOFILE"
+            gcloud storage cp "$GCS_UPLOAD_DIR/$BINFILE" "$GCS_UPLOAD_DIR/$PROMOFILE"
+          fi
