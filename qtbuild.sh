@@ -132,7 +132,7 @@ if [[ ! -d "$QT_SRC_PATH" ]]; then
             # without it, qt builds fail with undefined symbols due to configure only taking first architecture into account
             echo "Patching $QT_SRC_PATH for osx universal builds with qmake"
             patch -d "$QT_SRC_PATH/qtbase" < "./qt5-osx-configure.json.patch"
-        elif [[ $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -lt 3 ]]; then
+        elif [[ $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -eq 2 && $QT_PATCH_VERSION -lt 5 ]]; then
             # QT6.2.4 on OSX only: this patch fixes a bug in a third-party dependency of WebEngine
             patch -p0 -d "$QT_SRC_PATH" < "./qt6-harfbuzz.patch"
         fi

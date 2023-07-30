@@ -10,46 +10,34 @@ Projects that use these artifacts must adhere to the terms & conditions of the [
 ## Download Links
 
 Mac OS X (Universal)
-* [Qt 6.2.4 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.4-static-osx.tar.gz)
-* [Qt 6.2.4 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.2.4-dynamic-osx.tar.gz)
+* [Qt 6.2.5 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.5-static-osx.tar.gz)
+* [Qt 6.2.5 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.2.5-dynamic-osx.tar.gz)
 * [Qt 5.15.10 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.10-static-osx.tar.gz)
 * [Qt 5.15.10 Dynamic](https://files.jacktrip.org/contrib/qt/qt-5.15.10-dynamic-osx.tar.gz)
 
 Windows MSVC (64-bit)
-* [Qt 6.2.4 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.4-static-win.zip)
-* [Qt 6.2.4 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.2.4-dynamic-win.zip)
+* [Qt 6.2.5 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.5-static-win.zip)
+* [Qt 6.2.5 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.2.5-dynamic-win.zip)
 * [Qt 5.15.10 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.10-static-win.zip)
 * [Qt 5.15.10 Dynamic](https://files.jacktrip.org/contrib/qt/qt-5.15.10-dynamic-win.zip)
 
 Linux (64-bit)
-* [Qt 6.2.4 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.4-static-linux.tar.gz)
+* [Qt 6.2.5 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.5-static-linux.tar.gz)
 * [Qt 5.15.10 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.10-static-linux.tar.gz)
 
-## qtbuild.sh (for Unix)
+## qtbuild.sh
+
+For Linux, Mac OS X, Windows MinGW (WIP)
 
 `./qtbuild.sh <VERSION>`
 
 Creates static build of Qt in `/opt/qt-<VERSION>-static`
 
-Supports:
-* Qt5
-* Qt6
-* Linux
-* OSX
-* Windows MinGW (WIP)
-
 `./qtbuild.sh -dynamic <VERSION>`
 
 Creates dynamic build of Qt in `/opt/qt-<VERSION>-dynamic`
 
-Supports:
-* Qt5
-* Qt6
-* Linux
-* OSX
-* Windows MinGW (WIP)
-
-For OSX, use environment variable `QT_BUILD_ARCH` to specify Intel or ARM architecture:
+For OS X, use environment variable `QT_BUILD_ARCH` to specify Intel or ARM architecture:
 
 * Intel: 'x86_64'
 * Arm: 'arm64'
@@ -57,13 +45,15 @@ For OSX, use environment variable `QT_BUILD_ARCH` to specify Intel or ARM archit
 * Universal (Qt6): 'x86_64;arm64'
 
 
-## qtbuild.bat (for Windows MSVC x64)
+## qtbuild.bat
+
+For Microsoft Windows (MSVC)
 
 `qtbuild.bat <VERSION>`
 
 Creates static build of Qt in `c:\qt\qt-<VERSION>-static`
 
-`qtbuild.bat <VERSION>`
+`qtbuild.bat -dynamic <VERSION>`
 
 Creates dynamic build of Qt in `c:\qt\qt-<VERSION>-dynamic`
 
