@@ -89,6 +89,11 @@ C:\Program Files\NASM
 
 (restart terminal to pick up changes)
 
+Install html5lib (required for 6.2.5+):
+```
+pip3 install html5lib
+```
+
 Load Visual Studio paths ([from here](https://learn.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-160)):
 ```
 "%ProgramFiles%\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"

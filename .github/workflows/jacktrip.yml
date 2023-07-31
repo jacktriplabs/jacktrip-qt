@@ -147,6 +147,10 @@ jobs:
       - name: Windows - setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static')
+      - name: Install python dependencies
+        if: needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static'
+        run: |
+          pip3 install html5lib
       - name: Unix - build Qt from source
         if: runner.os != 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static')
         env:
