@@ -1,0 +1,334 @@
+diff --git a/content/browser/find_in_page_client.cc b/content/browser/find_in_page_client.cc
+index 8a15a579c4cc3b..55dd5b051b1968 100644
+--- a/content/browser/find_in_page_client.cc
++++ b/content/browser/find_in_page_client.cc
+@@ -46,10 +46,12 @@ void FindInPageClient::SetActiveMatch(
+   HandleUpdateType(request_id, update_type);
+ }
+ 
++#if OS_ANDROID
+ void FindInPageClient::ActivateNearestFindResult(int request_id,
+                                                  const gfx::PointF& point) {
+   frame_->GetFindInPage()->ActivateNearestFindResult(request_id, point);
+ }
++#endif
+ 
+ void FindInPageClient::HandleUpdateType(
+     int request_id,
+diff --git a/content/browser/find_in_page_client.h b/content/browser/find_in_page_client.h
+index 946c6734054547..459dad5cd85148 100644
+--- a/content/browser/find_in_page_client.h	2022-11-25 14:06:20
++++ b/content/browser/find_in_page_client.h	2023-07-31 16:58:15
+@@ -5,6 +5,7 @@
+ #ifndef CONTENT_BROWSER_FIND_IN_PAGE_CLIENT_H_
+ #define CONTENT_BROWSER_FIND_IN_PAGE_CLIENT_H_
+
++#include "build/build_config.h"
+ #include "mojo/public/cpp/bindings/receiver.h"
+ #include "third_party/blink/public/mojom/frame/find_in_page.mojom.h"
+
+@@ -22,7 +23,9 @@
+
+   ~FindInPageClient() override;
+
++#if OS_ANDROID
+   void ActivateNearestFindResult(int request_id, const gfx::PointF& point);
++#endif
+
+   // Current number of matches for this frame.
+   int number_of_matches() { return number_of_matches_; }
+diff --git a/third_party/blink/public/mojom/frame/find_in_page.mojom b/third_party/blink/public/mojom/frame/find_in_page.mojom
+index dc2f5f827d3a40..5f95c6cbc85d79 100644
+--- a/third_party/blink/public/mojom/frame/find_in_page.mojom
++++ b/third_party/blink/public/mojom/frame/find_in_page.mojom
+@@ -26,8 +26,14 @@ interface FindInPage {
+   // (and no longer highlight it with special coloring).
+   ClearActiveFindMatch();
+ 
++  // Sets the client for this FindInPage instance. Should be called before
++  // calling ActivateNearestFindResult.
++  // TODO(rakina): Remove the need for this?
++  SetClient(pending_remote<FindInPageClient> client);
++
+   // Request the distance to the nearest find result in a frame from |point|
+   // defined in fractions of the content document's width and height.
++  [EnableIf=is_android]
+   GetNearestFindResult(gfx.mojom.PointF point) => (float distance);
+ 
+   // Activates a find result nearest to |point|, which is in fractions of the
+@@ -35,13 +41,9 @@ interface FindInPage {
+   // SetActiveMatch or SetNumberOfMatches on the FindInPageClient for this
+   // FindInPage instance.
+   // TODO(rakina): Find a way to remove |request_id|
++  [EnableIf=is_android]
+   ActivateNearestFindResult(int32 request_id, gfx.mojom.PointF point);
+ 
+-  // Sets the client for this FindInPage instance. Should be called before
+-  // calling ActivateNearestFindResult.
+-  // TODO(rakina): Remove the need for this?
+-  SetClient(pending_remote<FindInPageClient> client);
+-
+   // Returns the bounding boxes of the find-in-page match markers from the
+   // frame. The bounding boxes are returned in find-in-page coordinates.
+   //
+@@ -60,6 +62,7 @@ interface FindInPage {
+   // |active_rect| will contain the bounding box of the active find-in-page
+   // match marker, in similarly normalized coords (or an empty rect if there
+   // isn't one).
++  [EnableIf=is_android]
+   FindMatchRects(int32 current_version) =>
+                 (int32 version, array<gfx.mojom.RectF> rects,
+                 gfx.mojom.RectF active_match_rect);
+diff --git a/third_party/blink/renderer/core/editing/finder/text_finder.cc b/third_party/blink/renderer/core/editing/finder/text_finder.cc
+index 10f9c0cab513a8..a26c4b56a4e9cd 100644
+--- a/third_party/blink/renderer/core/editing/finder/text_finder.cc
++++ b/third_party/blink/renderer/core/editing/finder/text_finder.cc
+@@ -709,6 +709,7 @@ void TextFinder::UpdateFindMatchRects() {
+   find_match_rects_are_valid_ = true;
+ }
+ 
++#if OS_ANDROID
+ gfx::RectF TextFinder::ActiveFindMatchRect() {
+   if (!current_active_match_frame_ || !active_match_)
+     return gfx::RectF();
+@@ -828,6 +829,7 @@ int TextFinder::SelectFindMatch(unsigned index, gfx::Rect* selection_rect) {
+ 
+   return active_match_index_ + 1;
+ }
++#endif  // OS_ANDROID
+ 
+ TextFinder::TextFinder(WebLocalFrameImpl& owner_frame)
+     : owner_frame_(&owner_frame),
+diff --git a/third_party/blink/renderer/core/editing/finder/text_finder.h b/third_party/blink/renderer/core/editing/finder/text_finder.h
+index 31cfa0375762ba..cf35ee3ed85c71 100644
+--- a/third_party/blink/renderer/core/editing/finder/text_finder.h	2022-11-25 14:06:20
++++ a/third_party/blink/renderer/core/editing/finder/text_finder.h	2023-07-31 16:52:29
+@@ -32,6 +32,7 @@
+ #define THIRD_PARTY_BLINK_RENDERER_CORE_EDITING_FINDER_TEXT_FINDER_H_
+ 
+ #include "base/cancelable_callback.h"
++#include "build/build_config.h"
+ #include "third_party/blink/public/mojom/frame/find_in_page.mojom-blink.h"
+ #include "third_party/blink/public/platform/web_string.h"
+ #include "third_party/blink/renderer/core/core_export.h"
+@@ -61,9 +62,11 @@
+   void StopFindingAndClearSelection();
+   void IncreaseMatchCount(int identifier, int count);
+   int FindMatchMarkersVersion() const { return find_match_markers_version_; }
++#if OS_ANDROID
+   gfx::RectF ActiveFindMatchRect();
+   Vector<gfx::RectF> FindMatchRects();
+   int SelectNearestFindMatch(const gfx::PointF&, gfx::Rect* selection_rect);
++#endif
+ 
+   // Starts brand new scoping request: resets the scoping state and
+   // asynchronously calls scopeStringMatches().
+@@ -75,14 +78,17 @@
+   void CancelPendingScopingEffort();
+ 
+   // This function is called to reset the total number of matches found during
++
+   // the scoping effort.
+   void ResetMatchCount();
+ 
++#if OS_ANDROID
+   // Return the index in the find-in-page cache of the match closest to the
+   // provided point in find-in-page coordinates, or -1 in case of error.
+   // The squared distance to the closest match is returned in the
+   // |distanceSquared| parameter.
+   int NearestFindMatch(const FloatPoint&, float* distance_squared);
++#endif
+ 
+   // Returns whether this frame has the active match.
+   bool ActiveMatchFrame() const { return current_active_match_frame_; }
+@@ -187,11 +193,13 @@
+   // the matches cache.
+   void InvalidateFindMatchRects();
+ 
++#if OS_ANDROID
+   // Select a find-in-page match marker in the current frame using a cache
+   // match index returned by nearestFindMatch. Returns the ordinal of the new
+   // selected match or -1 in case of error. Also provides the bounding box of
+   // the marker in window coordinates if selectionRect is not null.
+   int SelectFindMatch(unsigned index, gfx::Rect* selection_rect);
++#endif
+ 
+   // Compute and cache the rects for FindMatches if required.
+   // Rects are automatically invalidated in case of content size changes.
+diff --git a/third_party/blink/renderer/core/editing/finder/text_finder_test.cc b/third_party/blink/renderer/core/editing/finder/text_finder_test.cc
+index 92bd8b95d4ed6f..b8a36ce8e61531 100644
+--- a/third_party/blink/renderer/core/editing/finder/text_finder_test.cc
++++ b/third_party/blink/renderer/core/editing/finder/text_finder_test.cc
+@@ -331,6 +331,7 @@ TEST_F(TextFinderTest, FindTextInShadowDOM) {
+   EXPECT_EQ(3u, active_match->endOffset());
+ }
+ 
++#if OS_ANDROID
+ TEST_F(TextFinderTest, ScopeTextMatchesSimple) {
+   GetDocument().body()->setInnerHTML("XXXXFindMeYYYYfindmeZZZZ");
+   GetDocument().UpdateStyleAndLayout(DocumentUpdateReason::kTest);
+@@ -602,6 +603,7 @@ TEST_F(TextFinderTest, FindTextJavaScriptUpdatesDOMAfterNoMatches) {
+   EXPECT_EQ(FindInPageRect(text_in_i_element, 2, text_in_i_element, 8),
+             match_rects[0]);
+ }
++#endif  // OS_ANDROID
+ 
+ TEST_F(TextFinderTest, ScopeWithTimeouts) {
+   // Make a long string.
+diff --git a/third_party/blink/renderer/core/frame/find_in_page.cc b/third_party/blink/renderer/core/frame/find_in_page.cc
+index 6b824bdfbe17e8..909cb4c6dde552 100644
+--- a/third_party/blink/renderer/core/frame/find_in_page.cc
++++ b/third_party/blink/renderer/core/frame/find_in_page.cc
+@@ -215,6 +215,15 @@ int FindInPage::FindMatchMarkersVersion() const {
+   return 0;
+ }
+ 
++void FindInPage::SetClient(
++    mojo::PendingRemote<mojom::blink::FindInPageClient> remote) {
++  // TODO(crbug.com/984878): Having to call reset() to try to bind a remote that
++  // might be bound is questionable behavior and suggests code may be buggy.
++  client_.reset();
++  client_.Bind(std::move(remote));
++}
++
++#if OS_ANDROID
+ gfx::RectF FindInPage::ActiveFindMatchRect() {
+   if (GetTextFinder())
+     return GetTextFinder()->ActiveFindMatchRect();
+@@ -237,14 +246,6 @@ void FindInPage::ActivateNearestFindResult(int request_id,
+                             true /* final_update */);
+ }
+ 
+-void FindInPage::SetClient(
+-    mojo::PendingRemote<mojom::blink::FindInPageClient> remote) {
+-  // TODO(crbug.com/984878): Having to call reset() to try to bind a remote that
+-  // might be bound is questionable behavior and suggests code may be buggy.
+-  client_.reset();
+-  client_.Bind(std::move(remote));
+-}
+-
+ void FindInPage::GetNearestFindResult(const gfx::PointF& point,
+                                       GetNearestFindResultCallback callback) {
+   float distance;
+@@ -260,6 +261,7 @@ void FindInPage::FindMatchRects(int current_version,
+     rects = EnsureTextFinder().FindMatchRects();
+   std::move(callback).Run(rects_version, rects, ActiveFindMatchRect());
+ }
++#endif  // OS_ANDROID
+ 
+ void FindInPage::ClearActiveFindMatch() {
+   // TODO(rakina): Do collapse selection as this currently does nothing.
+diff --git a/third_party/blink/renderer/core/frame/find_in_page.h b/third_party/blink/renderer/core/frame/find_in_page.h
+index ed8bfa7f2d9f71..7b2c29e0c004b2 100644
+--- a/third_party/blink/renderer/core/frame/find_in_page.h
++++ b/third_party/blink/renderer/core/frame/find_in_page.h
+@@ -5,6 +5,7 @@
+ #ifndef THIRD_PARTY_BLINK_RENDERER_CORE_FRAME_FIND_IN_PAGE_H_
+ #define THIRD_PARTY_BLINK_RENDERER_CORE_FRAME_FIND_IN_PAGE_H_
+ 
++#include "build/build_config.h"
+ #include "mojo/public/cpp/bindings/associated_receiver.h"
+ #include "mojo/public/cpp/bindings/pending_associated_receiver.h"
+ #include "mojo/public/cpp/bindings/pending_remote.h"
+@@ -43,10 +44,12 @@ class CORE_EXPORT FindInPage final : public GarbageCollected<FindInPage>,
+ 
+   int FindMatchMarkersVersion() const;
+ 
++#if OS_ANDROID
+   // Returns the bounding box of the active find-in-page match marker or an
+   // empty rect if no such marker exists. The rect is returned in find-in-page
+   // coordinates.
+   gfx::RectF ActiveFindMatchRect();
++#endif
+ 
+   void ReportFindInPageMatchCount(int request_id, int count, bool final_update);
+ 
+@@ -59,25 +62,18 @@ class CORE_EXPORT FindInPage final : public GarbageCollected<FindInPage>,
+   void Find(int request_id,
+             const String& search_text,
+             mojom::blink::FindOptionsPtr) final;
+-
+-  void SetClient(mojo::PendingRemote<mojom::blink::FindInPageClient>) final;
+-
+-  void ActivateNearestFindResult(int request_id, const gfx::PointF&) final;
+-
+-  // Stops the current find-in-page, following the given |action|
+   void StopFinding(mojom::StopFindAction action) final;
+-
+-  // Returns the distance (squared) to the closest find-in-page match from the
+-  // provided point, in find-in-page coordinates.
++  void ClearActiveFindMatch() final;
++  void SetClient(mojo::PendingRemote<mojom::blink::FindInPageClient>) final;
++#if OS_ANDROID
+   void GetNearestFindResult(const gfx::PointF&,
+                             GetNearestFindResultCallback) final;
+ 
+-  // Returns the bounding boxes of the find-in-page match markers in the frame,
+-  // in find-in-page coordinates.
++  void ActivateNearestFindResult(int request_id, const gfx::PointF&) final;
++#endif
++#if OS_ANDROID
+   void FindMatchRects(int current_version, FindMatchRectsCallback) final;
+-
+-  // Clears the active find match in the frame, if one exists.
+-  void ClearActiveFindMatch() final;
++#endif
+ 
+   TextFinder* GetTextFinder() const;
+ 
+diff --git a/third_party/blink/renderer/core/frame/find_in_page_test.cc b/third_party/blink/renderer/core/frame/find_in_page_test.cc
+index 76dfe15f2a9892..981b8a6929893f 100644
+--- a/third_party/blink/renderer/core/frame/find_in_page_test.cc
++++ b/third_party/blink/renderer/core/frame/find_in_page_test.cc
+@@ -81,6 +81,7 @@ class FindInPageCallbackReceiver {
+   bool is_called;
+ };
+ 
++#if OS_ANDROID
+ TEST_F(FindInPageTest, FindMatchRectsReturnsCorrectRects) {
+   GetDocument().body()->setInnerHTML("aAaAbBaBbAaAaA");
+   GetDocument().UpdateStyleAndLayout(DocumentUpdateReason::kTest);
+@@ -105,6 +106,7 @@ TEST_F(FindInPageTest, FindMatchRectsReturnsCorrectRects) {
+                      GetTextFinder().ActiveFindMatchRect()));
+   EXPECT_TRUE(callback_receiver.IsCalled());
+ }
++#endif
+ 
+ TEST_F(FindInPageTest, FindAllAs) {
+   std::ostringstream str;
+diff --git a/third_party/blink/renderer/core/frame/web_frame_test.cc b/third_party/blink/renderer/core/frame/web_frame_test.cc
+index 2f564e2f11a4f3..d085b99427d376 100644
+--- a/third_party/blink/renderer/core/frame/web_frame_test.cc
++++ b/third_party/blink/renderer/core/frame/web_frame_test.cc
+@@ -5119,6 +5119,7 @@ class TestFindInPageClient : public mojom::blink::FindInPageClient {
+   mojo::Receiver<mojom::blink::FindInPageClient> receiver_{this};
+ };
+ 
++#if OS_ANDROID
+ TEST_F(WebFrameTest, FindInPageMatchRects) {
+   RegisterMockedHttpURLLoad("find_in_page_frame.html");
+ 
+@@ -5196,6 +5197,7 @@ TEST_F(WebFrameTest, FindInPageMatchRects) {
+   EXPECT_TRUE(main_frame->GetFindInPage()->FindMatchMarkersVersion() !=
+               rects_version);
+ }
++#endif  // OS_ANDROID
+ 
+ TEST_F(WebFrameTest, FindInPageActiveIndex) {
+   RegisterMockedHttpURLLoad("find_match_count.html");
+@@ -12123,6 +12125,7 @@ TEST_F(WebFrameSimTest, TickmarksDocumentRelative) {
+   EXPECT_EQ(gfx::Point(800, 2000), original_tickmarks[0].origin());
+ }
+ 
++#if OS_ANDROID
+ TEST_F(WebFrameSimTest, FindInPageSelectNextMatch) {
+   WebView().MainFrameViewWidget()->Resize(gfx::Size(500, 300));
+   WebView().GetPage()->GetSettings().SetTextAutosizingEnabled(false);
+@@ -12198,6 +12201,7 @@ TEST_F(WebFrameSimTest, FindInPageSelectNextMatch) {
+       << frame_view->GetScrollableArea()->VisibleContentRect().ToString()
+       << "]";
+ }
++#endif  // OS_ANDROID
+ 
+ // Check that removing an element whilst focusing it does not cause a null
+ // pointer deference. This test passes if it does not crash.

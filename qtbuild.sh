@@ -131,22 +131,41 @@ if [[ ! -d "$QT_SRC_PATH" ]]; then
             # QT5 (qmake) on OSX only: this patch force enables the arm64 neon feature for universal binary builds on osx
             # without it, qt builds fail with undefined symbols due to configure only taking first architecture into account
             echo "Patching $QT_SRC_PATH for osx universal builds with qmake"
-            patch -d "$QT_SRC_PATH/qtbase" < "./qt5-osx-configure.json.patch"
-        elif [[ $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -eq 2 && $QT_PATCH_VERSION -lt 5 ]]; then
-            # QT6.2.4 on OSX only: this patch fixes a bug in a third-party dependency of WebEngine
-            patch -p0 -d "$QT_SRC_PATH" < "./qt6-harfbuzz.patch"
+            patch -d "$QT_SRC_PATH/qtbase" < "./patches/qt5-osx-configure.json.patch"
+        elif [[ $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -eq 2 ]]; then
+            if [[ $QT_PATCH_VERSION -lt 5 ]]; then
+                # QT6.2.4 on OSX only: this patch fixes a bug in a third-party dependency of WebEngine
+                echo "Patching $QT_SRC_PATH for webengine harfbuzz"
+                patch -p0 -d "$QT_SRC_PATH" < "./patches/qt-6.2.4-webengine-harfbuzz.patch"
+            else
+                # QT6.2.5 on OSX only: fix chromium bug where it tries to use cups when printing is disabled
+                echo "Patching $QT_SRC_PATH for webengine cups"
+                patch -p1 -d "$QT_SRC_PATH" < "./patches/qt-6.2.5-webengine-cups.patch"
+                # QT6.2.5 on OSX only: fix chromium bug with grit util using invalid open mode for python 3.11
+                # https://chromium.googlesource.com/chromium/src/tools/grit/+/821d13663040ba027d96ab201449c9948f7a232c%5E%21/
+                echo "Patching $QT_SRC_PATH for webengine grit"
+                patch -p1 -d "$QT_SRC_PATH" < "./patches/qt-6.2.5-webengine-grit.patch"
+                # QT6.2.5 on OSX only: chromium fails to build due to ambiguous uses of RectF constructor
+                # Apparently offending methods are only used on Android, so applying a patch to remove them from
+                # https://github.com/chromium/chromium/commit/25979e23867a65003335932cf4be7fb09f85fe81?diff=unified
+                echo "Patching $QT_SRC_PATH for webengine findinpage"
+                patch -p1 -d "$QT_SRC_PATH/qtwebengine/src/3rdparty/chromium" < "./patches/qt-6.2.5-webengine-findinpage.patch"
+                # QT6.2.5 on OSX only: patches for more ambiguous constructors in webengine
+                echo "Patching $QT_SRC_PATH for webengine constructors"
+                patch -p1 -d "$QT_SRC_PATH" < "./patches/qt-6.2.5-webengine-constructors.patch"
+            fi
         fi
     elif [[ "$OS" == "linux" && $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -lt 5 ]]; then
         # QT6 (cmake) on Linux only: fix bug with building WebEngine
         # Unknown CMake command "check_for_ulimit".
         # see https://bugreports.qt.io/browse/QTBUG-109046
         echo "Patching $QT_SRC_PATH for linux ulimit bug with cmake"
-        patch -p1 -d "$QT_SRC_PATH" < "./qt6-linux-ulimit.patch"
+        patch -p1 -d "$QT_SRC_PATH" < "./patches/qt6-linux-ulimit.patch"
     elif [[ $"OS" == "windows" ]]; then
         if [[ $QT_MAJOR_VERSIONM -eq 6 ]]; then
             echo "Patching $QT_SRC_PATH for winrt webview backend"
             # This hasn't been ported to qt6 yet
-            # patch -p0 -d "$QT_SRC_PATH" < "./qt6-winrt-webview.patch"
+            # patch -p0 -d "$QT_SRC_PATH" < "./patches/qt6-winrt-webview.patch"
         fi
     fi
 fi
@@ -220,7 +239,7 @@ if [[ "$OS" == "osx" ]]; then
             QT_BUILD_ARCH="x86_64;arm64"
         fi
         if [[ $QT_DYNAMIC_BUILD -eq 1 ]]; then
-            # don't try to build universal dynamic builds on osx arm due to this bug
+            # don't try to build universal dynamic builds on osx arm due to this bug (fixed in 6.2.5)
             # https://bugreports.qt.io/browse/QTBUG-100672
             PROCESSOR=$(uname -p)
             if [[ $QT_MAJOR_VERSION -eq 5 ]]; then

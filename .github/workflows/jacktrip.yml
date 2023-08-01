@@ -72,25 +72,25 @@ jobs:
           qt-version: '5.15.10'
           qt-type: 'static'
           qt-arch: 'x86_64 arm64'
-          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
+          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt5
         - name: qt-6.2.5-static-osx
           runs-on: macos-12
           qt-version: '6.2.5'
           qt-type: 'static'
           qt-arch: 'x86_64;arm64'
-          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
+          xcode-directory: /Applications/Xcode_14.2.app
         - name: qt-5.15.10-dynamic-osx
           runs-on: macos-12-xl
           qt-version: '5.15.10'
           qt-type: 'dynamic'
           qt-arch: 'x86_64 arm64'
-          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
+          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt5
         - name: qt-6.2.5-dynamic-osx
           runs-on: macos-12-xl
           qt-version: '6.2.5'
           qt-type: 'dynamic'
           qt-arch: 'x86_64;arm64'
-          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt
+          xcode-directory: /Applications/Xcode_14.2.app
         - name: qt-5.15.10-static-win
           runs-on: windows-2019
           qt-version: '5.15.10'

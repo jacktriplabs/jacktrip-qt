@@ -1,0 +1,11 @@
+--- a/qtwebengine/src/3rdparty/chromium/chrome/browser/BUILD.gn	2022-11-25 14:06:20
++++ b/qtwebengine/src/3rdparty/chromium/chrome/browser/BUILD.gn	2023-07-31 12:41:34
+@@ -6747,7 +6747,7 @@
+     ]
+   }
+ 
+-  if (use_cups) {
++  if (use_cups && enable_basic_printing) {
+     configs += [ "//printing:cups" ]
+     if (is_chromeos) {
+       sources += [

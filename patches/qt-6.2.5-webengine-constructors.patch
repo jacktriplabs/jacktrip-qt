@@ -1,0 +1,45 @@
+--- a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/core/frame/frame_view.cc	2023-07-31 18:16:20
++++ b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/core/frame/frame_view.cc	2023-07-31 18:17:55
+@@ -193,7 +193,7 @@
+   SetViewportIntersection(mojom::blink::ViewportIntersectionState(
+       viewport_intersection, mainframe_intersection, gfx::Rect(),
+       occlusion_state, gfx::Size(frame.GetMainFrameViewportSize()),
+-      gfx::Point(frame.GetMainFrameScrollOffset()), main_frame_gfx_transform));
++      frame.GetMainFrameScrollOffset(), main_frame_gfx_transform));
+ 
+   UpdateFrameVisibility(!viewport_intersection.IsEmpty());
+
+--- a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/core/paint/paint_timing_detector.cc	2023-07-31 18:32:10
++++ b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/core/paint/paint_timing_detector.cc	2023-07-31 18:35:34
+@@ -326,7 +326,7 @@
+   // May be nullptr in tests.
+   if (!widget)
+     return float_rect;
+-  return FloatRect(widget->BlinkSpaceToDIPs(gfx::RectF(float_rect)));
++  return FloatRect(widget->BlinkSpaceToDIPs(float_rect));
+ }
+
+ FloatRect PaintTimingDetector::CalculateVisualRect(
+--- a/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/modules/exported/web_ax_object.cc	2023-07-31 18:43:36
++++ b/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/modules/exported/web_ax_object.cc	2023-07-31 18:45:14
+@@ -1193,7 +1193,7 @@
+   private_->GetRelativeBounds(&container, bounds, container_transform,
+                               clips_children);
+   offset_container = WebAXObject(container);
+-  bounds_in_container = gfx::RectF(bounds);
++  bounds_in_container = bounds;
+ }
+
+ void WebAXObject::GetAllObjectsWithChangedBounds(
+--- qt-everywhere-src-6.2.5/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/compositing/paint_chunks_to_cc_layer.cc.orig	2023-07-31 19:55:50
++++ qt-everywhere-src-6.2.5/qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/graphics/compositing/paint_chunks_to_cc_layer.cc	2023-07-31 19:57:07
+@@ -988,8 +988,7 @@
+           .MapPoint(FloatPoint(point));
+
+   mapped_point.MoveBy(-layer_offset);
+-  gfx::Point out_point(RoundedIntPoint(mapped_point));
+-  return out_point;
++  return RoundedIntPoint(mapped_point);
+ }
+
+ static cc::LayerSelectionBound
