@@ -9,6 +9,7 @@ Makefile
 /openssl.tar.xz
 /CMakeCache.txt
 /CMakeFiles/
+/CMakeFiles_*.rsp
 /qt*/
 /*.cmake
 /build.ninja

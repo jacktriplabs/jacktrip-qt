@@ -10,7 +10,6 @@ setlocal EnableDelayedExpansion
 :: default versions
 set QT_DYNAMIC_BUILD=0
 set QT_FULL_VERSION=5.15.10
-set OPENSSL_FULL_VERSION=3.1.1
 
 :: check for specific options
 if "%1" == "-h" (
@@ -77,21 +76,19 @@ Set QT5_SKIP_OPTIONS=-skip qt3d -skip qtactiveqt -skip qtandroidextras -skip qtc
 Set QT6_FEATURE_OPTIONS=-no-feature-qtpdf-build -no-feature-qtpdf-quick-build -no-feature-qtpdf-widgets-build -no-feature-printsupport
 Set QT6_SKIP_OPTIONS=-skip qtgrpc -skip qtlanguageserver -skip qtquick3dphysics
 Set QT_CONFIGURE_OPTIONS=-release -optimize-size -no-pch -nomake tools -nomake tests -nomake examples -opensource -confirm-license -feature-appstore-compliant
-Set QT_WINDOWS_OPTIONS=-platform win32-msvc
+Set QT_WINDOWS_OPTIONS=-platform win32-msvc -schannel -no-openssl
 Set QT_BUILD_PATH=c:\qt\qt-%QT_FULL_VERSION%
-Set OPENSSL_BUILD_PATH=c:\qt\openssl-%OPENSSL_FULL_VERSION%
 
 if %QT_DYNAMIC_BUILD% EQU 1 (
     echo Building dynamic qt-%QT_FULL_VERSION% on windows
     Set QT_BUILD_PATH=%QT_BUILD_PATH%-dynamic
-    Set QT_WINDOWS_OPTIONS=-openssl-linked %QT_WINDOWS_OPTIONS%
     echo Please ensure you meet the requirements for building QtWebEngine!
     echo See https://doc.qt.io/qt-%QT_MAJOR_VERSION%/qtwebengine-platform-notes.html
 ) else (
     echo Building static qt-%QT_FULL_VERSION% on windows
     Set QT_BUILD_PATH=%QT_BUILD_PATH%-static
     Set QT_CONFIGURE_OPTIONS=-static %QT_CONFIGURE_OPTIONS%
-    Set QT_WINDOWS_OPTIONS=-static-runtime -openssl-linked %QT_WINDOWS_OPTIONS%
+    Set QT_WINDOWS_OPTIONS=-static-runtime %QT_WINDOWS_OPTIONS%
     Set QT5_SKIP_OPTIONS=%QT5_SKIP_OPTIONS% -skip qtwebengine
 )
 
@@ -134,45 +131,9 @@ if exist %QT_BUILD_PATH%\ (
 )
 mkdir %QT_BUILD_PATH%
 
-:: OpenSSL
-if NOT exist %OPENSSL_BUILD_PATH%\ (
-    :: Build static openssl
-    :: see https://doc.qt.io/qt-6/ssl.html#enabling-and-disabling-ssl-support-when-building-qt-from-source
-    if NOT exist openssl-%OPENSSL_FULL_VERSION%\ (
-        echo Downloading openssl-%OPENSSL_FULL_VERSION%
-        Set OPENSSL_SRC_URL=https://github.com/openssl/openssl/releases/download/openssl-%OPENSSL_FULL_VERSION%/openssl-%OPENSSL_FULL_VERSION%.tar.gz
-        curl -L !OPENSSL_SRC_URL! -o openssl.tar.gz
-        tar -xf openssl.tar.gz
-    )
-    echo Building openssl-%OPENSSL_FULL_VERSION%
-    mkdir %OPENSSL_BUILD_PATH%
-    mkdir openssl-build
-    cd openssl-build
-    perl ..\openssl-%OPENSSL_FULL_VERSION%\Configure --prefix=%OPENSSL_BUILD_PATH% --openssldir=%OPENSSL_BUILD_PATH%\ssl VC-WIN64A threads no-shared no-pic no-tests -static
-    if %ERRORLEVEL% NEQ 0 EXIT /B 0
-    if %HAVE_JOM% EQU 1 (
-        jom /j 4
-    ) else (
-        nmake
-    )
-    if %ERRORLEVEL% NEQ 0 EXIT /B 0
-    nmake install
-    if %ERRORLEVEL% NEQ 0 EXIT /B 0
-    cd ..
-)
-
-:: copy static openssl into qt build
-xcopy /S "%OPENSSL_BUILD_PATH%\lib" "%QT_BUILD_PATH%\lib\"
-xcopy /S "%OPENSSL_BUILD_PATH%\include" "%QT_BUILD_PATH%\include\"
-
 echo QT Configure command
-if %QT_MAJOR_VERSION% EQU 5 (
-    echo "%QT_SRC_PATH:\=/%/configure.bat" -prefix "%QT_BUILD_PATH:\=/%" %QT_WINDOWS_OPTIONS% %QT_CONFIGURE_OPTIONS% -I "%QT_BUILD_PATH:\=/%/include" -L "%QT_BUILD_PATH:\=/%/lib" OPENSSL_LIBS="%QT_BUILD_PATH:\=/%/lib/libcrypto.lib %QT_BUILD_PATH:\=/%/lib/libssl.lib -lAdvapi32 -lUser32 -lcrypt32 -lws2_32"
-    call "%QT_SRC_PATH:\=/%/configure.bat" -prefix "%QT_BUILD_PATH:\=/%" %QT_WINDOWS_OPTIONS% %QT_CONFIGURE_OPTIONS% -I "%QT_BUILD_PATH:\=/%/include" -L "%QT_BUILD_PATH:\=/%/lib" OPENSSL_LIBS="%QT_BUILD_PATH:\=/%/lib/libcrypto.lib %QT_BUILD_PATH:\=/%/lib/libssl.lib -lAdvapi32 -lUser32 -lcrypt32 -lws2_32"
-) else (
-    echo "%QT_SRC_PATH:\=/%/configure.bat" -prefix "%QT_BUILD_PATH:\=/%" %QT_WINDOWPTIONS% %QT_CONFIGURE_OPTIONS% -I "%QT_BUILD_PATH:\=/%/include" -L "%QT_BUILD_PATH:\=/%/lib" OPENSSL_ROOT_DIR="%QT_BUILD_PATH:\=/%" OPENSSL_LIBS="%QT_BUILD_PATH:\=/%/lib/libcrypto.lib %QT_BUILD_PATH:\=/%/lib/libssl.lib -lAdvapi32 -lUser32 -lcrypt32 -lws2_32"
-    call "%QT_SRC_PATH:\=/%/configure.bat" -prefix "%QT_BUILD_PATH:\=/%" %QT_WINDOWS_OPTIONS% %QT_CONFIGURE_OPTIONS% -I "%QT_BUILD_PATH:\=/%/include" -L "%QT_BUILD_PATH:\=/%/lib" OPENSSL_ROOT_DIR="%QT_BUILD_PATH:\=/%" OPENSSL_LIBS="%QT_BUILD_PATH:\=/%/lib/libcrypto.lib %QT_BUILD_PATH:\=/%/lib/libssl.lib -lAdvapi32 -lUser32 -lcrypt32 -lws2_32"
-)
+echo "%QT_SRC_PATH:\=/%/configure.bat" -prefix "%QT_BUILD_PATH:\=/%" %QT_WINDOWS_OPTIONS% %QT_CONFIGURE_OPTIONS% -I "%QT_BUILD_PATH:\=/%/include" -L "%QT_BUILD_PATH:\=/%/lib"
+call "%QT_SRC_PATH:\=/%/configure.bat" -prefix "%QT_BUILD_PATH:\=/%" %QT_WINDOWS_OPTIONS% %QT_CONFIGURE_OPTIONS% -I "%QT_BUILD_PATH:\=/%/include" -L "%QT_BUILD_PATH:\=/%/lib"
 if %ERRORLEVEL% NEQ 0 EXIT /B 0
 
 echo Building QT %QT_FULL_VERSION%
@@ -203,5 +164,5 @@ EXIT /B 0
     rmdir /q /s config.tests CMakeFiles .qt openssl-build openssl-%OPENSSL_FULL_VERSION%
     rmdir /q /s qtbase bin mkspecs qmake qtconnectivity qtdeclarative qtquick3d qtquickcontrols2 qtscxml qtwayland qtgraphicaleffects qtlottie qtmacextras qtnetworkauth qtquickcontrols qtquicktimeline qtsvg qtwebsockets qtwinextras qtx11extras
     rmdir /q /s qt5compat qtcoap qtgrpc qthttpserver qtlanguageserver qtmqtt qtopcua qtpositioning qtquick3dphysics qtquickeffectmaker qtshadertools qttools qttranslations qtwebengine qtwebview qtwebchannel qt3d qtactiveqt qtcharts qtdatavis3d qtimageformats qtmultimedia
-    del /q qt.zip openssl.tar.gz .config.notes .qmake.cache .qmake.stash .qmake.super config.cache config.log config.opt config.opt.in config.status.bat config.summary Makefile CMakeCache.txt CTestTestfile.cmake cmake_install.cmake .ninja_deps .ninja_log build.ninja install_manifest.txt
+    del /q qt.zip openssl.tar.gz .config.notes .qmake.cache .qmake.stash .qmake.super config.cache config.log config.opt config.opt.in config.status.bat config.summary Makefile CMakeCache.txt CTestTestfile.cmake cmake_install.cmake .ninja_deps .ninja_log build.ninja install_manifest.txt CMakeFiles_QtWebEngineCore_Release_objects.rsp
 EXIT /B 0

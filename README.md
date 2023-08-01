@@ -65,15 +65,21 @@ Install Visual Studio (from [here](https://learn.microsoft.com/en-us/windows/app
 winget install "Visual Studio Community 2022"  --override "--add Microsoft.VisualStudio.Workload.NativeDesktop Microsoft.VisualStudio.ComponentGroup.WindowsAppSDK.Cpp"  -s msstore
 ```
 
+Install python3 using winget since chocolately packages seem to be broken:
+
+```
+winget install python3
+```
+
 Install chocolately:
 
 [Chocolatey Software | Installing Chocolatey](https://chocolatey.org/install)
 
-Install a few tasty packages:
+Install some tasty packages (meson 1.2.0 is broken):
 
 ```
-choco install -y git jom zip unzip cmake ninja meson pkgconfiglite winflexbison3 gperf nodejs-lts python2 python3 nasm StrawberryPerl
-
+choco install -y meson --version 1.1.1
+choco install -y git jom zip unzip cmake ninja pkgconfiglite winflexbison3 gperf nodejs-lts python2 nasm StrawberryPerl
 ```
 
 Go to Windows Search, type "Envir" and choose "Edit the system environment variables"
