@@ -59,14 +59,6 @@ jobs:
       fail-fast: false # don't abort if one of the build failse
       matrix:
         include:
-        - name: qt-5.15.10-static-linux
-          runs-on: ubuntu-20.04
-          qt-version: '5.15.10'
-          qt-type: 'static'
-        - name: qt-6.2.5-static-linux
-          runs-on: ubuntu-20.04
-          qt-version: '6.2.5'
-          qt-type: 'static'
         - name: qt-5.15.10-static-osx
           runs-on: macos-12
           qt-version: '5.15.10'
@@ -79,34 +71,6 @@ jobs:
           qt-type: 'static'
           qt-arch: 'x86_64;arm64'
           xcode-directory: /Applications/Xcode_14.2.app
-        - name: qt-5.15.10-dynamic-osx
-          runs-on: macos-12-xl
-          qt-version: '5.15.10'
-          qt-type: 'dynamic'
-          qt-arch: 'x86_64 arm64'
-          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt5
-        - name: qt-6.2.5-dynamic-osx
-          runs-on: macos-12-xl
-          qt-version: '6.2.5'
-          qt-type: 'dynamic'
-          qt-arch: 'x86_64;arm64'
-          xcode-directory: /Applications/Xcode_14.2.app
-        - name: qt-5.15.10-static-win
-          runs-on: windows-2019
-          qt-version: '5.15.10'
-          qt-type: 'static'
-        - name: qt-6.2.5-static-win
-          runs-on: windows-2019
-          qt-version: '6.2.5'
-          qt-type: 'static'
-        - name: qt-5.15.10-dynamic-win
-          runs-on: windows-2019-8core
-          qt-version: '5.15.10'
-          qt-type: 'dynamic'
-        - name: qt-6.2.5-dynamic-win
-          runs-on: windows-2019-8core
-          qt-version: '6.2.5'
-          qt-type: 'dynamic'
     permissions:
       contents: "read"
       id-token: "write"
@@ -196,21 +160,27 @@ jobs:
           path: ${{ steps.create-binary.outputs.filename }}
       - name: Authenticate to GCS
         uses: google-github-actions/auth@v1
-        if: needs.preflight.outputs.upload_artifact == 'true'
         with:
           workload_identity_provider: ${{ env.GCP_IDP }}
           service_account: ${{ env.GCS_SVC_ACCT }}
           create_credentials_file: true
       - name: Setup SDK for GCS
-        if: needs.preflight.outputs.upload_artifact == 'true'
         uses: 'google-github-actions/setup-gcloud@v1'
         with:
-          version: '>= 363.0.0'
+          version: '440.0.0'
+      - name: Work-around bug in python 3.11.5
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          # temporary work-around for bug in python 3.11.5
+          # see https://github.com/python/cpython/issues/108520
+          brew install python@3.10
+          echo "CLOUDSDK_PYTHON=python3.10" >> $GITHUB_ENV
       - name: Upload build artifact to GCS
-        if: needs.preflight.outputs.upload_artifact == 'true'
         shell: bash
         run: |
           # this feature seems to produce permission denied errors on osx and linux runners
+          gcloud version
           gcloud config set storage/parallel_composite_upload_enabled False
           BINFILE="${{ steps.create-binary.outputs.filename }}"
           echo "Uploading $BINFILE to $GCS_UPLOAD_DIR"
