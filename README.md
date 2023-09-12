@@ -59,6 +59,9 @@ Creates dynamic build of Qt in `c:\qt\qt-<VERSION>-dynamic`
 
 ### Before you build...
 
+_Ensure that you checkout this repository in a path that is close to your drive's top-level
+directory. Otherwise, you will run into obscure errors due to Windows path size limitations!_
+
 Install Visual Studio (from [here](https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/set-up-your-development-environment?tabs=cs-vs-community%2Ccpp-vs-community%2Cvs-2022-17-1-a%2Cvs-2022-17-1-b)):
 
 ```
@@ -79,7 +82,7 @@ Install some tasty packages (meson 1.2.0 is broken):
 
 ```
 choco install -y meson --version 1.1.1
-choco install -y git jom zip unzip cmake ninja pkgconfiglite winflexbison3 gperf nodejs-lts python2 nasm StrawberryPerl
+choco install -y git jom zip unzip cmake ninja pkgconfiglite winflexbison3 gperf nodejs-lts python nasm StrawberryPerl
 ```
 
 Go to Windows Search, type "Envir" and choose "Edit the system environment variables"
@@ -98,6 +101,11 @@ C:\Program Files\NASM
 Install html5lib (required for 6.2.5+):
 ```
 pip3 install html5lib
+```
+
+Install importlib-metadata (required for WebEngine in 6.5+):
+```
+pip3 install importlib-metadata
 ```
 
 Load Visual Studio paths ([from here](https://learn.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-160)):
