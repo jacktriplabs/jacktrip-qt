@@ -76,21 +76,21 @@ QT6_FEATURE_OPTIONS="-no-feature-qtpdf-build -no-feature-qtpdf-quick-build -no-f
 QT6_SKIP_OPTIONS="-skip qtgrpc -skip qtlanguageserver -skip qtquick3dphysics"
 QT_CONFIGURE_OPTIONS="-release -optimize-size -no-pch -nomake tools -nomake tests -nomake examples -opensource -confirm-license -feature-appstore-compliant"
 QT_LINUX_OPTIONS="-qt-zlib -qt-libpng -qt-libjpeg -system-freetype -fontconfig -qt-pcre -qt-harfbuzz -no-icu -opengl desktop"
-QT_WINDOWS_OPTIONS="-opengl desktop -platform win32-msvc"
+QT_WINDOWS_OPTIONS="-opengl desktop -platform win32-g++ -schannel -no-openssl"
 MAKE_OPTIONS="-j4"
 CMAKE_OPTIONS="--parallel"
 
 QT_BUILD_PATH=/opt/qt-${QT_FULL_VERSION}
 OPENSSL_BUILD_PATH="/opt/openssl-${OPENSSL_FULL_VERSION}"
 if [[ "$OS" == "windows" ]]; then
-    QT_BUILD_PATH="C:/qt/${QT_FULL_VERSION}"
+    QT_BUILD_PATH="C:/qt/qt-${QT_FULL_VERSION}"
 fi
 
 if [[ $QT_DYNAMIC_BUILD -eq 1 ]]; then
     echo "Building dynamic qt-$QT_FULL_VERSION on $OS"
     QT_BUILD_PATH="$QT_BUILD_PATH-dynamic"
     QT_LINUX_OPTIONS="-openssl-runtime $QT_LINUX_OPTIONS"
-    QT_WINDOWS_OPTIONS="-openssl-linked $QT_WINDOWS_OPTIONS"
+    QT_WINDOWS_OPTIONS="-webengine-proprietary-codecs $QT_WINDOWS_OPTIONS"
     echo "Please ensure you meet the requirements for building QtWebEngine!"
     echo "See https://doc.qt.io/qt-$QT_MAJOR_VERSION/qtwebengine-platform-notes.html"
 else
@@ -98,7 +98,7 @@ else
     QT_BUILD_PATH="$QT_BUILD_PATH-static"
     QT_CONFIGURE_OPTIONS="-static $QT_CONFIGURE_OPTIONS"
     QT_LINUX_OPTIONS="-openssl-linked $QT_LINUX_OPTIONS"
-    QT_WINDOWS_OPTIONS="-static-runtime -openssl-linked $QT_WINDOWS_OPTIONS"
+    QT_WINDOWS_OPTIONS="-static-runtime $QT_WINDOWS_OPTIONS"
     QT5_SKIP_OPTIONS="$QT5_SKIP_OPTIONS -skip qtwebengine"
 fi
 
@@ -279,14 +279,10 @@ fi
 if [[ "$OS" == "windows" ]]; then
     if [[ $QT_MAJOR_VERSION -eq 5 ]]; then
         QT_WINDOWS_OPTIONS="$QT_WINDOWS_OPTIONS -no-feature-d3d12"
-        echo "QT Configure command"
-        echo "\"$QT_SRC_PATH/configure.bat\" -prefix \"$QT_BUILD_PATH\" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L \"$QT_BUILD_PATH/lib\" -I \"$QT_BUILD_PATH/include\" OPENSSL_LIBS=\"-llibssl -llibcrypto -lcrypt32 -lws2_32\""
-        "$QT_SRC_PATH/configure.bat" -prefix "$QT_BUILD_PATH" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L "$QT_BUILD_PATH/lib" -I "$QT_BUILD_PATH/include" OPENSSL_LIBS="-llibssl -llibcrypto -lcrypt32 -lws2_32"
-    else
-        echo "QT Configure command"
-        echo "\"$QT_SRC_PATH/configure.bat\" -prefix \"$QT_BUILD_PATH\" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L \"$QT_BUILD_PATH/lib\" -I \"$QT_BUILD_PATH/include\" OPENSSL_ROOT_DIR=\"$QT_BUILD_PATH\" OPENSSL_LIBS=\"-llibssl -llibcrypto -lcrypt32 -lws2_32\""
-        "$QT_SRC_PATH/configure.bat" -prefix "$QT_BUILD_PATH" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS -L "$QT_BUILD_PATH/lib" -I "$QT_BUILD_PATH/include" OPENSSL_ROOT_DIR="$QT_BUILD_PATH" OPENSSL_LIBS="-llibssl -llibcrypto -lcrypt32 -lws2_32"
     fi
+    echo "QT Configure command"
+    echo "\"$QT_SRC_PATH/configure.bat\" -prefix \"$QT_BUILD_PATH\" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS"
+    "$QT_SRC_PATH/configure.bat" -prefix "$QT_BUILD_PATH" $QT_WINDOWS_OPTIONS $QT_CONFIGURE_OPTIONS
 fi
 
 if [[ $QT_MAJOR_VERSION -eq 5 ]]; then
