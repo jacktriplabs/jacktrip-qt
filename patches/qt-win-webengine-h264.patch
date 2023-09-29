@@ -1,0 +1,11 @@
+--- a/qtwebengine/src/3rdparty/chromium/third_party/webrtc/webrtc.gni     2023-09-28 16:19:25.269453200 -0700
++++ b/qtwebengine/src/3rdparty/chromium/third_party/webrtc/webrtc.gni     2023-09-28 16:22:05.654520200 -0700
+@@ -179,7 +179,7 @@
+   # Enabling H264 when building with MSVC is currently not supported, see
+   # bugs.webrtc.org/9213#c13 for more info.
+   rtc_use_h264 =
+-      proprietary_codecs && !is_android && !is_ios && !(is_win && !is_clang)
++      proprietary_codecs && !is_android && !is_ios
+
+   # Enable this flag to make webrtc::Mutex be implemented by absl::Mutex.
+   rtc_use_absl_mutex = false
