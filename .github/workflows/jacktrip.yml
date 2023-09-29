@@ -174,7 +174,9 @@ jobs:
         run: |
           mkdir C:\qt
           mkdir C:\qt\build
+          mkdir C:\qt\build\patches
           copy qtbuild.bat c:\qt\build\qtbuild.bat
+          copy patches\*.* C:\qt\build\patches
           cd c:\qt\build
           if ( "${{ matrix.qt-type }}" -eq "dynamic" ) { c:\qt\build\qtbuild.bat -dynamic ${{ matrix.qt-version }} } else { c:\qt\build\qtbuild.bat ${{ matrix.qt-version }} }
       - name: Compress the build directory
