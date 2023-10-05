@@ -63,9 +63,9 @@ jobs:
           runs-on: ubuntu-20.04
           qt-version: '5.15.10'
           qt-type: 'static'
-        - name: qt-6.2.5-static-linux
+        - name: qt-6.2.6-static-linux
           runs-on: ubuntu-20.04
-          qt-version: '6.2.5'
+          qt-version: '6.2.6'
           qt-type: 'static'
         - name: qt-5.15.10-static-osx
           runs-on: macos-12
@@ -73,9 +73,9 @@ jobs:
           qt-type: 'static'
           qt-arch: 'x86_64 arm64'
           xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt5
-        - name: qt-6.2.5-static-osx
+        - name: qt-6.2.6-static-osx
           runs-on: macos-12
-          qt-version: '6.2.5'
+          qt-version: '6.2.6'
           qt-type: 'static'
           qt-arch: 'x86_64;arm64'
           xcode-directory: /Applications/Xcode_14.2.app
@@ -85,9 +85,9 @@ jobs:
           qt-type: 'dynamic'
           qt-arch: 'x86_64 arm64'
           xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt5
-        - name: qt-6.2.5-dynamic-osx
+        - name: qt-6.2.6-dynamic-osx
           runs-on: macos-12-xl
-          qt-version: '6.2.5'
+          qt-version: '6.2.6'
           qt-type: 'dynamic'
           qt-arch: 'x86_64;arm64'
           xcode-directory: /Applications/Xcode_14.2.app
@@ -95,25 +95,25 @@ jobs:
           runs-on: windows-2019
           qt-version: '5.15.10'
           qt-type: 'static'
-        - name: qt-6.2.5-static-win
+        - name: qt-6.2.6-static-win
           runs-on: windows-2019
-          qt-version: '6.2.5'
+          qt-version: '6.2.6'
           qt-type: 'static'
-        - name: qt-6.5.2-static-win
+        - name: qt-6.5.3-static-win
           runs-on: windows-2019
-          qt-version: '6.5.2'
+          qt-version: '6.5.3'
           qt-type: 'static'
         - name: qt-5.15.10-dynamic-win
           runs-on: windows-2019-8core
           qt-version: '5.15.10'
           qt-type: 'dynamic'
-        - name: qt-6.2.5-dynamic-win
+        - name: qt-6.2.6-dynamic-win
           runs-on: windows-2019-8core
-          qt-version: '6.2.5'
+          qt-version: '6.2.6'
           qt-type: 'dynamic'
-        - name: qt-6.5.2-dynamic-win
+        - name: qt-6.5.3-dynamic-win
           runs-on: windows-2019-8core
-          qt-version: '6.5.2'
+          qt-version: '6.5.3'
           qt-type: 'dynamic'
     permissions:
       contents: "read"

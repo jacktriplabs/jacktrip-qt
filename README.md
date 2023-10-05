@@ -10,19 +10,20 @@ Projects that use these artifacts must adhere to the terms & conditions of the [
 ## Download Links
 
 Mac OS X (Universal)
-* [Qt 6.2.5 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.5-static-osx.tar.gz)
-* [Qt 6.2.5 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.2.5-dynamic-osx.tar.gz)
+* [Qt 6.2.6 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.6-static-osx.tar.gz)
+* [Qt 6.2.6 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.2.6-dynamic-osx.tar.gz)
 * [Qt 5.15.10 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.10-static-osx.tar.gz)
 * [Qt 5.15.10 Dynamic](https://files.jacktrip.org/contrib/qt/qt-5.15.10-dynamic-osx.tar.gz)
 
 Windows MSVC (64-bit)
-* [Qt 6.2.5 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.5-static-win.zip)
-* [Qt 6.2.5 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.2.5-dynamic-win.zip)
+* [Qt 6.5.3 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.5.3-dynamic-win.zip)
+* [Qt 6.2.6 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.6-static-win.zip)
+* [Qt 6.2.6 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.2.6-dynamic-win.zip)
 * [Qt 5.15.10 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.10-static-win.zip)
 * [Qt 5.15.10 Dynamic](https://files.jacktrip.org/contrib/qt/qt-5.15.10-dynamic-win.zip)
 
 Linux (64-bit)
-* [Qt 6.2.5 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.5-static-linux.tar.gz)
+* [Qt 6.2.6 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.6-static-linux.tar.gz)
 * [Qt 5.15.10 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.10-static-linux.tar.gz)
 
 ## qtbuild.sh
