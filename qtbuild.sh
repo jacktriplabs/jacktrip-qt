@@ -239,13 +239,15 @@ if [[ "$OS" == "osx" ]]; then
             QT_BUILD_ARCH="x86_64;arm64"
         fi
         if [[ $QT_DYNAMIC_BUILD -eq 1 ]]; then
-            # don't try to build universal dynamic builds on osx arm due to this bug (fixed in 6.2.5)
+            # don't try to build universal dynamic builds on osx arm due to this bug (fixed in 6.2.7)
             # https://bugreports.qt.io/browse/QTBUG-100672
             PROCESSOR=$(uname -p)
             if [[ $QT_MAJOR_VERSION -eq 5 ]]; then
                 QT_BUILD_ARCH=""
             elif [[ $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -lt 3 && "$PROCESSOR" == "arm" ]]; then
-                QT_BUILD_ARCH=""
+                if [[ $QT_MINOR_VERSION -eq 2 && $QT_PATCH_VERSION -lt 7 ]]; then
+                    QT_BUILD_ARCH=""
+                fi
             fi
         fi
     fi
