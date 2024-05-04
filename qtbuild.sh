@@ -10,8 +10,8 @@ set -e
 
 # default versions
 QT_DYNAMIC_BUILD=0
-QT_FULL_VERSION=5.15.10
-OPENSSL_FULL_VERSION=3.1.1
+QT_FULL_VERSION=5.15.13
+OPENSSL_FULL_VERSION=3.1.5
 
 # display help information
 qtbuild_help() {
