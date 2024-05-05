@@ -63,32 +63,32 @@ jobs:
         #  runs-on: ubuntu-20.04
         #  qt-version: '5.15.13'
         #  qt-type: 'static'
-        - name: qt-6.5.3-static-linux-amd64
-          runs-on: ubuntu-20.04
-          qt-version: '6.5.3'
-          qt-type: 'static'
+        #- name: qt-6.5.3-static-linux-amd64
+        #  runs-on: ubuntu-20.04
+        #  qt-version: '6.5.3'
+        #  qt-type: 'static'
         #- name: qt-6.5.3-static-linux-arm64
         #  runs-on: ubuntu-20.04-8core-arm64
         #  qt-version: '6.5.3'
         #  qt-type: 'static'
-        #- name: qt-5.15.13-static-osx
-        #  runs-on: macos-12
-        #  qt-version: '5.15.13'
-        #  qt-type: 'static'
-        #  qt-arch: 'x86_64 arm64'
-        #  xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt5
-        #- name: qt-6.2.8-static-osx
-        #  runs-on: macos-12
-        #  qt-version: '6.2.8'
-        #  qt-type: 'static'
-        #  qt-arch: 'x86_64;arm64'
-        #  xcode-directory: /Applications/Xcode_14.2.app
-        #- name: qt-6.2.8-dynamic-osx
-        #  runs-on: macos-12-xl
-        #  qt-version: '6.2.8'
-        #  qt-type: 'dynamic'
-        #  qt-arch: 'x86_64;arm64'
-        #  xcode-directory: /Applications/Xcode_14.2.app
+        - name: qt-5.15.13-static-osx
+          runs-on: macos-12
+          qt-version: '5.15.13'
+          qt-type: 'static'
+          qt-arch: 'x86_64 arm64'
+          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt5
+        - name: qt-6.2.8-static-osx
+          runs-on: macos-12
+          qt-version: '6.2.8'
+          qt-type: 'static'
+          qt-arch: 'x86_64;arm64'
+          xcode-directory: /Applications/Xcode_14.2.app
+        - name: qt-6.2.8-dynamic-osx
+          runs-on: macos-12-xl
+          qt-version: '6.2.8'
+          qt-type: 'dynamic'
+          qt-arch: 'x86_64;arm64'
+          xcode-directory: /Applications/Xcode_14.2.app
     permissions:
       contents: "read"
       id-token: "write"

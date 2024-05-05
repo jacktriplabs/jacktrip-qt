@@ -1,0 +1,27 @@
+--- a/qtbase/cmake/FindWrapOpenGL.cmake
++++ b/qtbase/cmake/FindWrapOpenGL.cmake
+@@ -14,22 +14,9 @@
+ 
+     add_library(WrapOpenGL::WrapOpenGL INTERFACE IMPORTED)
+     if(APPLE)
+-        # On Darwin platforms FindOpenGL sets IMPORTED_LOCATION to the absolute path of the library
+-        # within the framework. This ends up as an absolute path link flag, which we don't want,
+-        # because that makes our .prl files un-relocatable.
+-        # Extract the framework path instead, and use that in INTERFACE_LINK_LIBRARIES,
+-        # which CMake ends up transforming into a reloctable -framework flag.
+-        # See https://gitlab.kitware.com/cmake/cmake/-/issues/20871 for details.
+-        get_target_property(__opengl_fw_lib_path OpenGL::GL IMPORTED_LOCATION)
+-        if(__opengl_fw_lib_path)
+-            get_filename_component(__opengl_fw_path "${__opengl_fw_lib_path}" DIRECTORY)
+-        endif()
++        # Just a safety measure in case if no OpenGL::GL target exists.
++        set(__opengl_fw_path "-framework OpenGL")
+ 
+-        if(NOT __opengl_fw_path)
+-            # Just a safety measure in case if no OpenGL::GL target exists.
+-            set(__opengl_fw_path "-framework OpenGL")
+-        endif()
+-
+         find_library(WrapOpenGL_AGL NAMES AGL)
+         if(WrapOpenGL_AGL)
+             set(__opengl_agl_fw_path "${WrapOpenGL_AGL}")
