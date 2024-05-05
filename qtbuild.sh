@@ -195,11 +195,15 @@ if [[ $QT_DYNAMIC_BUILD -ne 1 && "$OS" != "osx" ]]; then
         cd openssl-build
         "$OPENSSL_SRC_PATH/Configure" --prefix=$OPENSSL_BUILD_PATH threads no-shared no-pic no-tests -static
         make -j4
-        make install
+        make install_sw
         cd ..
     fi
     # copy static openssl into qt build
-    cp -r $OPENSSL_BUILD_PATH/lib64 $QT_BUILD_PATH
+    if [[ -d "$OPENSSL_BUILD_PATH/lib64" ]]; then
+        cp -r $OPENSSL_BUILD_PATH/lib64 $QT_BUILD_PATH/lib
+    else
+        cp -r $OPENSSL_BUILD_PATH/lib $QT_BUILD_PATH
+    fi
     mkdir -p $QT_BUILD_PATH/include
     cp -r $OPENSSL_BUILD_PATH/include/openssl $QT_BUILD_PATH/include
 fi
@@ -220,12 +224,12 @@ if [[ "$OS" == "linux" ]]; then
         "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS
     elif [[ $QT_MAJOR_VERSION -eq 5 ]]; then
         # static link openssl (no OPENSSL_ROOT_DIR)
-        echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_LIBS=\"$QT_BUILD_PATH/lib64/libssl.a $QT_BUILD_PATH/lib64/libcrypto.a\" -I \"$QT_BUILD_PATH/include\""
-        "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_LIBS="$QT_BUILD_PATH/lib64/libssl.a $QT_BUILD_PATH/lib64/libcrypto.a" -I "$QT_BUILD_PATH/include"
+        echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_LIBS=\"$QT_BUILD_PATH/lib/libssl.a $QT_BUILD_PATH/lib/libcrypto.a -ldl\" -I \"$QT_BUILD_PATH/include\""
+        "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_LIBS="$QT_BUILD_PATH/lib/libssl.a $QT_BUILD_PATH/lib/libcrypto.a -ldl" -I "$QT_BUILD_PATH/include"
     else
         # static link openssl (with OPENSSL_ROOT_DIR)
-        echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_ROOT_DIR=\"$QT_BUILD_PATH\" OPENSSL_LIBS=\"$QT_BUILD_PATH/lib64/libssl.a $QT_BUILD_PATH/lib64/libcrypto.a\" -I \"$QT_BUILD_PATH/include\""
-        "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_ROOT_DIR="$QT_BUILD_PATH" OPENSSL_LIBS="$QT_BUILD_PATH/lib64/libssl.a $QT_BUILD_PATH/lib64/libcrypto.a" -I "$QT_BUILD_PATH/include"
+        echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_ROOT_DIR=\"$QT_BUILD_PATH\" OPENSSL_USE_STATIC_LIBS=\"TRUE\" -I \"$QT_BUILD_PATH/include\""
+        "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_ROOT_DIR="$QT_BUILD_PATH" OPENSSL_USE_STATIC_LIBS="TRUE" -I "$QT_BUILD_PATH/include"
     fi
 fi
 
