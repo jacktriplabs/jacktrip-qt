@@ -59,48 +59,10 @@ jobs:
       fail-fast: false # don't abort if one of the build failse
       matrix:
         include:
-        - name: qt-5.15.13-static-linux-amd64
-          runs-on: ubuntu-20.04
-          qt-version: '5.15.13'
-          qt-type: 'static'
-        - name: qt-6.5.3-static-linux-amd64
-          runs-on: ubuntu-20.04
-          qt-version: '6.5.3'
-          qt-type: 'static'
-        - name: qt-6.5.3-static-linux-arm64
-          runs-on: ubuntu-20.04-8core-arm64
-          qt-version: '6.5.3'
-          qt-type: 'static'
-        - name: qt-5.15.13-static-osx
-          runs-on: macos-12
-          qt-version: '5.15.13'
-          qt-type: 'static'
-          qt-arch: 'x86_64 arm64'
-          xcode-directory: /Applications/Xcode_14.0.1.app # uses SDK macOS 12.3 which is latest supported by qt5
-        - name: qt-6.2.8-static-osx
-          runs-on: macos-12
-          qt-version: '6.2.8'
-          qt-type: 'static'
-          qt-arch: 'x86_64;arm64'
-          xcode-directory: /Applications/Xcode_14.2.app
-        - name: qt-6.2.8-dynamic-osx
-          runs-on: macos-12-xl
-          qt-version: '6.2.8'
-          qt-type: 'dynamic'
-          qt-arch: 'x86_64;arm64'
-          xcode-directory: /Applications/Xcode_14.2.app
         - name: qt-5.15.13-static-win
           runs-on: windows-2019
           qt-version: '5.15.13'
           qt-type: 'static'
-        - name: qt-6.5.3-static-win
-          runs-on: windows-2019
-          qt-version: '6.5.3'
-          qt-type: 'static'
-        - name: qt-6.5.3-dynamic-win
-          runs-on: windows-2019-8core
-          qt-version: '6.5.3'
-          qt-type: 'dynamic'
     permissions:
       contents: "read"
       id-token: "write"
@@ -109,95 +71,6 @@ jobs:
       GCS_SVC_ACCT: ${{ secrets.GCS_SVC_ACCT }}
       GCS_UPLOAD_DIR: 'gs://files.jacktrip.org/contrib/qt'
     steps:
-      - name: Checkout repository
-        if: needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          submodules: true
-      - name: Linux - install dependencies
-        if: runner.os == 'Linux' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static')
-        shell: bash
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes libclang-dev libclang-11-dev llvm-11-dev libclang-12-dev llvm-12-dev ninja-build python3-pip
-          sudo apt-get install --yes libfreetype6-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libx11-xcb-dev libdrm-dev libglu1-mesa-dev libwayland-dev libwayland-egl1-mesa libgles2-mesa-dev libwayland-server0 libwayland-egl-backend-dev libxcb1-dev libxext-dev libfontconfig1-dev libxrender-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev '^libxcb.*-dev' libxcb-render-util0-dev libxcomposite-dev libgtk-3-dev
-          if [ "$(uname -m)" = "x86_64" ]; then export ARCH=x86_64; else export ARCH=aarch64; fi
-          curl -L -o cmake.tar.gz https://github.com/Kitware/CMake/releases/download/v3.29.2/cmake-3.29.2-linux-${ARCH}.tar.gz
-          tar -xf cmake.tar.gz
-          sudo mkdir -p /opt
-          sudo mv cmake-3.29.2-linux-${ARCH} /opt/
-          sudo ln -s /opt/cmake-3.29.2-linux-${ARCH} /opt/cmake
-          echo "/opt/cmake/bin" >> $GITHUB_PATH
-      - name: OSX - install dependencies
-        if: runner.os == 'macOS' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static')
-        env:
-          HOMEBREW_NO_ANALYTICS: 1
-          HOMEBREW_NO_AUTO_UPDATE: 1
-          HOMEBREW_NO_INSTALL_CLEANUP: 1
-        run: |
-          brew install ninja
-          if [[ -n "${{ matrix.xcode-directory }}" ]]; then
-            sudo xcode-select -s ${{ matrix.xcode-directory }}
-          fi
-      - name: Windows - install dependencies
-        if: runner.os == 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static')
-        shell: bash
-        run: |
-          choco install pkgconfiglite winflexbison3 gperf nodejs-lts python2 python3 nasm StrawberryPerl --no-progress
-          echo "c:\Program Files\NASM" >> $GITHUB_PATH
-      - name: Windows - setup MSVC
-        uses: ilammy/msvc-dev-cmd@v1
-        if: runner.os == 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static')
-      - name: Install python dependencies
-        if: needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static'
-        run: |
-          pip3 install html5lib
-      - name: Unix - build Qt from source
-        if: runner.os != 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static')
-        env:
-          QT_BUILD_ARCH: ${{ matrix.qt-arch }}
-        run: |
-          sudo chmod a+rwx /opt
-          mkdir -p /opt/qtbuild
-          if [[ "${{ matrix.qt-type }}" == "dynamic" ]]; then ./qtbuild.sh -dynamic ${{ matrix.qt-version }}; else ./qtbuild.sh ${{ matrix.qt-version }}; fi
-      - name: Windows - build Qt from source
-        if: runner.os == 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static')
-        env:
-          QT_BUILD_ARCH: ${{ matrix.qt-arch }}
-        run: |
-          mkdir C:\qt
-          mkdir C:\qt\build
-          mkdir C:\qt\build\patches
-          copy qtbuild.bat c:\qt\build\qtbuild.bat
-          copy patches\*.* C:\qt\build\patches
-          cd c:\qt\build
-          if ( "${{ matrix.qt-type }}" -eq "dynamic" ) { c:\qt\build\qtbuild.bat -dynamic ${{ matrix.qt-version }} } else { c:\qt\build\qtbuild.bat ${{ matrix.qt-version }} }
-      - name: Compress the build directory
-        if: needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static'
-        shell: bash
-        id: create-binary
-        run: |
-          BASENAME="qt-${{ matrix.qt-version }}-${{ matrix.qt-type }}"
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            cd c:/qt/
-            EXT="zip"
-            BINFILE="${{ matrix.name }}-${{ needs.preflight.outputs.commit }}.zip"
-            7z a "$GITHUB_WORKSPACE/$BINFILE" -tzip $BASENAME
-          else
-            cd /opt
-            EXT="tar.gz"
-            BINFILE="${{ matrix.name }}-${{ needs.preflight.outputs.commit }}.tar.gz"
-            tar -czf "$GITHUB_WORKSPACE/$BINFILE" $BASENAME
-          fi
-          echo "filename=$BINFILE" >> $GITHUB_OUTPUT
-          echo "ext=$EXT" >> $GITHUB_OUTPUT
-      - name: Upload build artifact to GitHub
-        if: needs.preflight.outputs.upload_artifact == 'true'
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.name }}
-          path: ${{ steps.create-binary.outputs.filename }}
       - name: Authenticate to GCS
         uses: google-github-actions/auth@v1
         if: needs.preflight.outputs.upload_artifact == 'true'
@@ -206,18 +79,15 @@ jobs:
           service_account: ${{ env.GCS_SVC_ACCT }}
           create_credentials_file: true
       - name: Setup SDK for GCS
-        if: needs.preflight.outputs.upload_artifact == 'true'
-        uses: 'google-github-actions/setup-gcloud@v1'
+        if: needs.preflight.outputs.upload_artifact == 'true' && runner.os != 'Windows'
+        uses: 'google-github-actions/setup-gcloud@v2'
         with:
           version: '>= 363.0.0'
-      - name: Work-around bug in python 3.11.5
-        if: needs.preflight.outputs.upload_artifact == 'true' && runner.os == 'macOS'
-        shell: bash
-        run: |
-          # temporary work-around for bug in python 3.11.5
-          # see https://github.com/python/cpython/issues/108520
-          brew install python@3.10
-          echo "CLOUDSDK_PYTHON=python3.10" >> $GITHUB_ENV
+      - name: Setup SDK for GCS (Windows)
+        if: needs.preflight.outputs.upload_artifact == 'true' && runner.os == 'Windows'
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          skip_install: true
       - name: Upload build artifact to GCS
         if: needs.preflight.outputs.upload_artifact == 'true'
         shell: bash
