@@ -59,14 +59,13 @@ jobs:
       fail-fast: false # don't abort if one of the build failse
       matrix:
         include:
-        - name: qt-5.15.13-static-linux-arm64
-          runs-on: ubuntu-20.04-8core-arm64
-          qt-version: '5.15.13'
-          qt-type: 'static'
-        - name: qt-5.15.13-static-win
-          runs-on: windows-2019
-          qt-version: '5.15.13'
-          qt-type: 'static'
+        - name: qt-6.2.8-dynamic-osx
+          runs-on: macos-12-xl
+          qt-version: '6.2.8'
+          qt-type: 'dynamic'
+          qt-arch: 'x86_64;arm64'
+          is-free: false
+          xcode-directory: /Applications/Xcode_14.2.app
     permissions:
       contents: "read"
       id-token: "write"
@@ -76,13 +75,13 @@ jobs:
       GCS_UPLOAD_DIR: 'gs://files.jacktrip.org/contrib/qt'
     steps:
       - name: Checkout repository
-        if: needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static'
+        if: needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free == 'true'
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
           submodules: true
       - name: Linux - install dependencies
-        if: runner.os == 'Linux' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static')
+        if: runner.os == 'Linux' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free == 'true')
         shell: bash
         run: |
           sudo apt-get update
@@ -96,7 +95,7 @@ jobs:
           sudo ln -s /opt/cmake-3.29.2-linux-${ARCH} /opt/cmake
           echo "/opt/cmake/bin" >> $GITHUB_PATH
       - name: OSX - install dependencies
-        if: runner.os == 'macOS' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static')
+        if: runner.os == 'macOS' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free == 'true')
         env:
           HOMEBREW_NO_ANALYTICS: 1
           HOMEBREW_NO_AUTO_UPDATE: 1
@@ -107,20 +106,20 @@ jobs:
             sudo xcode-select -s ${{ matrix.xcode-directory }}
           fi
       - name: Windows - install dependencies
-        if: runner.os == 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static')
+        if: runner.os == 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free == 'true')
         shell: bash
         run: |
           choco install pkgconfiglite winflexbison3 gperf nodejs-lts python2 python3 nasm StrawberryPerl --no-progress
           echo "c:\Program Files\NASM" >> $GITHUB_PATH
       - name: Windows - setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
-        if: runner.os == 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static')
+        if: runner.os == 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free == 'true')
       - name: Install python dependencies
-        if: needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static'
+        if: needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free == 'true'
         run: |
           pip3 install html5lib
       - name: Unix - build Qt from source
-        if: runner.os != 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static')
+        if: runner.os != 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free == 'true')
         env:
           QT_BUILD_ARCH: ${{ matrix.qt-arch }}
         run: |
@@ -128,7 +127,7 @@ jobs:
           mkdir -p /opt/qtbuild
           if [[ "${{ matrix.qt-type }}" == "dynamic" ]]; then ./qtbuild.sh -dynamic ${{ matrix.qt-version }}; else ./qtbuild.sh ${{ matrix.qt-version }}; fi
       - name: Windows - build Qt from source
-        if: runner.os == 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static')
+        if: runner.os == 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free == 'true')
         env:
           QT_BUILD_ARCH: ${{ matrix.qt-arch }}
         run: |
@@ -140,7 +139,7 @@ jobs:
           cd c:\qt\build
           if ( "${{ matrix.qt-type }}" -eq "dynamic" ) { c:\qt\build\qtbuild.bat -dynamic ${{ matrix.qt-version }} } else { c:\qt\build\qtbuild.bat ${{ matrix.qt-version }} }
       - name: Compress the build directory
-        if: needs.preflight.outputs.upload_artifact == 'true' || matrix.qt-type == 'static'
+        if: needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free == 'true'
         shell: bash
         id: create-binary
         run: |
