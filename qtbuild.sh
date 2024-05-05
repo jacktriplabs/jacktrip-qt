@@ -10,8 +10,8 @@ set -e
 
 # default versions
 QT_DYNAMIC_BUILD=0
-QT_FULL_VERSION=5.15.10
-OPENSSL_FULL_VERSION=3.1.1
+QT_FULL_VERSION=5.15.13
+OPENSSL_FULL_VERSION=3.1.5
 
 # display help information
 qtbuild_help() {
@@ -133,11 +133,11 @@ if [[ ! -d "$QT_SRC_PATH" ]]; then
             echo "Patching $QT_SRC_PATH for osx universal builds with qmake"
             patch -d "$QT_SRC_PATH/qtbase" < "./patches/qt5-osx-configure.json.patch"
         elif [[ $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -eq 2 ]]; then
-            if [[ $QT_PATCH_VERSION -lt 5 ]]; then
+            if [[ $QT_PATCH_VERSION -eq 4 ]]; then
                 # QT6.2.4 on OSX only: this patch fixes a bug in a third-party dependency of WebEngine
                 echo "Patching $QT_SRC_PATH for webengine harfbuzz"
                 patch -p0 -d "$QT_SRC_PATH" < "./patches/qt-6.2.4-webengine-harfbuzz.patch"
-            else
+            elif [[ $QT_PATCH_VERSION -eq 5 ]]; then
                 # QT6.2.5 on OSX only: fix chromium bug where it tries to use cups when printing is disabled
                 echo "Patching $QT_SRC_PATH for webengine cups"
                 patch -p1 -d "$QT_SRC_PATH" < "./patches/qt-6.2.5-webengine-cups.patch"
@@ -153,6 +153,10 @@ if [[ ! -d "$QT_SRC_PATH" ]]; then
                 # QT6.2.5 on OSX only: patches for more ambiguous constructors in webengine
                 echo "Patching $QT_SRC_PATH for webengine constructors"
                 patch -p1 -d "$QT_SRC_PATH" < "./patches/qt-6.2.5-webengine-constructors.patch"
+            elif [[ $QT_PATCH_VERSION -gt 6 ]]; then
+                # QT6.2.7+ on OSX only: patch for OpenGL framework (otherwise not found)
+                echo "Patching $QT_SRC_PATH for OpenGL framework"
+                patch -p1 -d "$QT_SRC_PATH" < "./patches/qt-6.2.x-opengl-framework.patch"
             fi
         fi
     elif [[ "$OS" == "linux" && $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -lt 5 ]]; then
@@ -195,11 +199,15 @@ if [[ $QT_DYNAMIC_BUILD -ne 1 && "$OS" != "osx" ]]; then
         cd openssl-build
         "$OPENSSL_SRC_PATH/Configure" --prefix=$OPENSSL_BUILD_PATH threads no-shared no-pic no-tests -static
         make -j4
-        make install
+        make install_sw
         cd ..
     fi
     # copy static openssl into qt build
-    cp -r $OPENSSL_BUILD_PATH/lib64 $QT_BUILD_PATH
+    if [[ -d "$OPENSSL_BUILD_PATH/lib64" ]]; then
+        cp -r $OPENSSL_BUILD_PATH/lib64 $QT_BUILD_PATH/lib
+    else
+        cp -r $OPENSSL_BUILD_PATH/lib $QT_BUILD_PATH
+    fi
     mkdir -p $QT_BUILD_PATH/include
     cp -r $OPENSSL_BUILD_PATH/include/openssl $QT_BUILD_PATH/include
 fi
@@ -220,12 +228,12 @@ if [[ "$OS" == "linux" ]]; then
         "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS
     elif [[ $QT_MAJOR_VERSION -eq 5 ]]; then
         # static link openssl (no OPENSSL_ROOT_DIR)
-        echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_LIBS=\"$QT_BUILD_PATH/lib64/libssl.a $QT_BUILD_PATH/lib64/libcrypto.a\" -I \"$QT_BUILD_PATH/include\""
-        "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_LIBS="$QT_BUILD_PATH/lib64/libssl.a $QT_BUILD_PATH/lib64/libcrypto.a" -I "$QT_BUILD_PATH/include"
+        echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_LIBS=\"$QT_BUILD_PATH/lib/libssl.a $QT_BUILD_PATH/lib/libcrypto.a -ldl\" -I \"$QT_BUILD_PATH/include\""
+        "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_LIBS="$QT_BUILD_PATH/lib/libssl.a $QT_BUILD_PATH/lib/libcrypto.a -ldl" -I "$QT_BUILD_PATH/include"
     else
         # static link openssl (with OPENSSL_ROOT_DIR)
-        echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_ROOT_DIR=\"$QT_BUILD_PATH\" OPENSSL_LIBS=\"$QT_BUILD_PATH/lib64/libssl.a $QT_BUILD_PATH/lib64/libcrypto.a\" -I \"$QT_BUILD_PATH/include\""
-        "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_ROOT_DIR="$QT_BUILD_PATH" OPENSSL_LIBS="$QT_BUILD_PATH/lib64/libssl.a $QT_BUILD_PATH/lib64/libcrypto.a" -I "$QT_BUILD_PATH/include"
+        echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_ROOT_DIR=\"$QT_BUILD_PATH\" OPENSSL_USE_STATIC_LIBS=\"TRUE\" -I \"$QT_BUILD_PATH/include\""
+        "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_LINUX_OPTIONS $QT_CONFIGURE_OPTIONS OPENSSL_ROOT_DIR="$QT_BUILD_PATH" OPENSSL_USE_STATIC_LIBS="TRUE" -I "$QT_BUILD_PATH/include"
     fi
 fi
 
@@ -239,13 +247,15 @@ if [[ "$OS" == "osx" ]]; then
             QT_BUILD_ARCH="x86_64;arm64"
         fi
         if [[ $QT_DYNAMIC_BUILD -eq 1 ]]; then
-            # don't try to build universal dynamic builds on osx arm due to this bug (fixed in 6.2.5)
+            # don't try to build universal dynamic builds on osx arm due to this bug (fixed in 6.2.7)
             # https://bugreports.qt.io/browse/QTBUG-100672
             PROCESSOR=$(uname -p)
             if [[ $QT_MAJOR_VERSION -eq 5 ]]; then
                 QT_BUILD_ARCH=""
             elif [[ $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -lt 3 && "$PROCESSOR" == "arm" ]]; then
-                QT_BUILD_ARCH=""
+                if [[ $QT_MINOR_VERSION -eq 2 && $QT_PATCH_VERSION -lt 7 ]]; then
+                    QT_BUILD_ARCH=""
+                fi
             fi
         fi
     fi

@@ -9,7 +9,7 @@ setlocal EnableDelayedExpansion
 
 :: default versions
 set QT_DYNAMIC_BUILD=0
-set QT_FULL_VERSION=5.15.10
+set QT_FULL_VERSION=5.15.13
 
 :: check for specific options
 if "%1" == "-h" (
