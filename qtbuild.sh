@@ -157,6 +157,10 @@ if [[ ! -d "$QT_SRC_PATH" ]]; then
                 # QT6.2.7+ on OSX only: patch for OpenGL framework (otherwise not found)
                 echo "Patching $QT_SRC_PATH for OpenGL framework"
                 patch -p1 -d "$QT_SRC_PATH" < "./patches/qt-6.2.x-opengl-framework.patch"
+                # newer python release don't recognize "import imp"
+                # see https://gitlab.alpinelinux.org/alpine/aports/-/issues/16081
+                echo "Patching $QT_SRC_PATH for chromium mojo with newer python"
+                patch -p1 -d "$QT_SRC_PATH" < "./patches/qt-6.2.x-webengine-mojo-python.patch"
             fi
         fi
     elif [[ "$OS" == "linux" && $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -lt 5 ]]; then

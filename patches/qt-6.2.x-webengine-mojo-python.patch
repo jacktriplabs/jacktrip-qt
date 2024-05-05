@@ -1,0 +1,20 @@
+--- a/qtwebengine/src/3rdparty/chromium/mojo/public/tools/mojom/mojom/fileutil.py	2024-05-05 15:06:43
++++ b/qtwebengine/src/3rdparty/chromium/mojo/public/tools/mojom/mojom/fileutil.py	2024-05-05 15:02:04
+@@ -3,7 +3,6 @@
+ # found in the LICENSE file.
+ 
+ import errno
+-import imp
+ import os.path
+ import sys
+ 
+--- a/qtwebengine/src/3rdparty/chromium/mojo/public/tools/mojom/mojom/parse/lexer.py	2024-05-05 15:06:43
++++ b/qtwebengine/src/3rdparty/chromium/mojo/public/tools/mojom/mojom/parse/lexer.py	2024-05-05 15:03:28
+@@ -2,7 +2,6 @@
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+ 
+-import imp
+ import os.path
+ import sys
+ 
