@@ -25,6 +25,7 @@ Linux (AMD64)
 
 Linux (ARM64)
 * [Qt 6.5.3 Static](https://files.jacktrip.org/contrib/qt/qt-6.5.3-static-linux-arm64.tar.gz)
+* [Qt 5.15.13 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.13-static-linux-arm64.tar.gz)
 
 
 ## qtbuild.sh
