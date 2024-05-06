@@ -74,7 +74,7 @@ QT5_FEATURE_OPTIONS="-no-feature-cups -no-feature-ocsp -no-feature-sqlmodel -no-
 QT5_SKIP_OPTIONS="-skip qt3d -skip qtactiveqt -skip qtandroidextras -skip qtcharts -skip qtcoap -skip qtdatavis3d -skip qtdoc -skip qtgamepad -skip qtimageformats -skip qtlocation -skip qtlottie -skip qtmqtt -skip qtmultimedia -skip qtopcua -skip qtpurchasing -skip qtquick3d -skip qtquicktimeline -skip qtscxml -skip qtremoteobjects -skip qtscript -skip qtsensors -skip qtserialbus -skip qtserialport -skip qtspeech -skip qttranslations -skip qtvirtualkeyboard -skip qtwebglplugin -skip qtxmlpatterns"
 QT6_FEATURE_OPTIONS="-no-feature-qtpdf-build -no-feature-qtpdf-quick-build -no-feature-qtpdf-widgets-build -no-feature-printsupport"
 QT6_SKIP_OPTIONS="-skip qtgrpc -skip qtlanguageserver -skip qtquick3dphysics"
-QT_CONFIGURE_OPTIONS="-release -optimize-size -no-pch -nomake tools -nomake tests -nomake examples -opensource -confirm-license -feature-appstore-compliant"
+QT_CONFIGURE_OPTIONS="-release -optimize-size -no-pch -nomake tests -nomake examples -opensource -confirm-license -feature-appstore-compliant"
 QT_LINUX_OPTIONS="-qt-zlib -qt-libpng -qt-libjpeg -system-freetype -fontconfig -qt-pcre -qt-harfbuzz -no-icu -opengl desktop"
 QT_WINDOWS_OPTIONS="-opengl desktop -platform win32-g++ -schannel -no-openssl"
 MAKE_OPTIONS="-j4"
@@ -161,6 +161,10 @@ if [[ ! -d "$QT_SRC_PATH" ]]; then
                 # see https://gitlab.alpinelinux.org/alpine/aports/-/issues/16081
                 echo "Patching $QT_SRC_PATH for chromium mojo with newer python"
                 patch -p1 -d "$QT_SRC_PATH" < "./patches/qt-6.2.x-webengine-mojo-python.patch"
+                # patch for missing spellcheck headers with ninja 1.12
+                # see https://codereview.qt-project.org/c/qt/qtwebengine-chromium/+/555586
+                echo "Patching $QT_SRC_PATH for chromium spellcheck with ninja 1.12+"
+                patch -p1 -d "$QT_SRC_PATH" < "./patches/qt-6.2.x-webengine-ninja-1.12.patch"
             fi
         fi
     elif [[ "$OS" == "linux" && $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -lt 5 ]]; then
@@ -276,6 +280,14 @@ if [[ "$OS" == "osx" ]]; then
             "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_CONFIGURE_OPTIONS "QMAKE_APPLE_DEVICE_ARCHS=$QT_BUILD_ARCH"
         fi
     else
+        if [[ $QT_DYNAMIC_BUILD -eq 1 && $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -eq 2 && $QT_PATCH_VERSION -gt 6 ]]; then
+            # qtwebengine fails to build if cups (or pdf) are disabled
+            # see https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=271111
+            QT_CONFIGURE_OPTIONS=$(echo $QT_CONFIGURE_OPTIONS | sed "s,-no-feature-cups,-cups,")
+            QT_CONFIGURE_OPTIONS=$(echo $QT_CONFIGURE_OPTIONS | sed "s,-no-feature-pdf -no-feature-printer -no-feature-printdialog -no-feature-printpreviewdialog -no-feature-printpreviewwidget,-feature-pdf -feature-printer,")
+            QT_CONFIGURE_OPTIONS=$(echo $QT_CONFIGURE_OPTIONS | sed "s,-no-feature-qtpdf-build,,")
+            QT_CONFIGURE_OPTIONS=$(echo $QT_CONFIGURE_OPTIONS | sed "s,-no-feature-printsupport,,")
+        fi
         # configure qt for osx
         if [[ "x$QT_BUILD_ARCH" == "x" ]]; then
             echo "QT Configure command (NOT universal)"

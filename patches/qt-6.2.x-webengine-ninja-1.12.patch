@@ -1,0 +1,10 @@
+--- a/qtwebengine/src/3rdparty/chromium/content/public/browser/BUILD.gn	2024-03-26 15:12:40
++++ b/qtwebengine/src/3rdparty/chromium/content/public/browser/BUILD.gn	2024-05-06 13:26:50
+@@ -487,6 +487,7 @@
+     "//cc",
+     "//components/services/storage/public/cpp",
+     "//components/viz/host",
++    "//components/spellcheck:buildflags",
+     "//content/browser",  # Must not be public_deps!
+     "//device/fido",
+     "//gpu",
