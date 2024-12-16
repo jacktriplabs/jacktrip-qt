@@ -28,6 +28,26 @@ Linux (ARM64)
 * [Qt 5.15.13 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.13-static-linux-arm64.tar.gz)
 
 
+## Linux Docker
+
+To build for Linux using Docker:
+
+amd64:
+```
+docker buildx build --platform linux/amd64 --target=artifact --output type=local,dest=./ --build-arg .
+```
+
+arm64
+```
+docker buildx build --platform linux/arm64 --target=artifact --output type=local,dest=./ --build-arg .
+```
+
+arm32:
+```
+docker buildx build --platform linux/arm/v7 --target=artifact --output type=local,dest=./ --build-arg BUILD_CONTAINER=debian:buster --build-arg QT_VERSION=5.15.13 .
+```
+
+
 ## qtbuild.sh
 
 For Linux, Mac OS X, Windows MinGW (WIP)

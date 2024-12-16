@@ -123,7 +123,7 @@ if [[ ! -d "$QT_SRC_PATH" ]]; then
         QT_ARCHIVE_BASE_NAME=${QT_ARCHIVE_BASE_NAME}opensource-
     fi
     QT_SRC_URL="https://download.qt.io/archive/qt/$QT_MAJOR_VERSION.$QT_MINOR_VERSION/$QT_FULL_VERSION/single/${QT_ARCHIVE_BASE_NAME}src-$QT_FULL_VERSION.tar.xz"
-    curl -L $QT_SRC_URL -o qt.tar.xz
+    curl -k -L $QT_SRC_URL -o qt.tar.xz
     tar -xf qt.tar.xz
 
     if [[ "$OS" == "osx" ]]; then
@@ -197,7 +197,7 @@ if [[ $QT_DYNAMIC_BUILD -ne 1 && "$OS" != "osx" ]]; then
         if [[ ! -d "$OPENSSL_SRC_PATH" ]]; then
             echo "Downloading openssl-${OPENSSL_FULL_VERSION}"
             OPENSSL_SRC_URL="https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_FULL_VERSION}/openssl-${OPENSSL_FULL_VERSION}.tar.gz"
-            curl -L $OPENSSL_SRC_URL -o openssl.tar.xz
+            curl -k -L $OPENSSL_SRC_URL -o openssl.tar.xz
             tar -xf openssl.tar.xz
             mv "openssl-$OPENSSL_FULL_VERSION" $OPENSSL_SRC_PATH
         fi
