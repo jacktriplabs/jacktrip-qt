@@ -205,7 +205,7 @@ if [[ $QT_DYNAMIC_BUILD -ne 1 && "$OS" != "osx" ]]; then
         mkdir $OPENSSL_BUILD_PATH
         mkdir -p openssl-build
         cd openssl-build
-        "$OPENSSL_SRC_PATH/Configure" --prefix=$OPENSSL_BUILD_PATH threads no-shared no-pic no-tests -static
+        "$OPENSSL_SRC_PATH/Configure" --prefix=$OPENSSL_BUILD_PATH threads no-shared no-tests -static -fPIC
         make -j4
         make install_sw
         cd ..

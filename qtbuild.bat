@@ -88,7 +88,6 @@ if %QT_DYNAMIC_BUILD% EQU 1 (
     echo Building static qt-%QT_FULL_VERSION% on windows
     Set QT_BUILD_PATH=%QT_BUILD_PATH%-static
     Set QT_CONFIGURE_OPTIONS=-static %QT_CONFIGURE_OPTIONS%
-    Set QT_WINDOWS_OPTIONS=-static-runtime %QT_WINDOWS_OPTIONS%
     Set QT5_SKIP_OPTIONS=%QT5_SKIP_OPTIONS% -skip qtwebengine
 )
 
