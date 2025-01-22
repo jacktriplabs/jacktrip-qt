@@ -2,8 +2,6 @@
 
 # container image versions
 ARG BUILD_CONTAINER=ubuntu:20.04
-ARG QT_VERSION=6.5.3
-ARG QT_TYPE=static
 
 FROM ${BUILD_CONTAINER} AS builder
 
@@ -16,6 +14,8 @@ RUN apt-get update \
   && apt-get install -yq --no-install-recommends libfreetype6-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libx11-xcb-dev libdrm-dev libglu1-mesa-dev libwayland-dev libwayland-egl1-mesa libgles2-mesa-dev libwayland-server0 libwayland-egl-backend-dev libxcb1-dev libxext-dev libfontconfig1-dev libxrender-dev libxcb-keysyms1-dev libxcb-image0-dev libxcb-shm0-dev libxcb-icccm4-dev '^libxcb.*-dev' libxcb-render-util0-dev libxcomposite-dev libgtk-3-dev
 
 # install html5lib and more recent cmake for qt6
+ARG QT_VERSION=6.5.3
+ENV QT_VERSION=$QT_VERSION
 RUN if [ `echo "$QT_VERSION" | grep "^6\..*"` ]; then \
   pip3 install html5lib \
   && apt-get install -yq --no-install-recommends software-properties-common lsb-release \
@@ -28,6 +28,8 @@ RUN if [ `echo "$QT_VERSION" | grep "^6\..*"` ]; then \
 # build qt
 COPY patches ./patches
 COPY qtbuild.sh ./qtbuild.sh
+ARG QT_TYPE=static
+ENV QT_TYPE=$QT_TYPE
 RUN if [ "$QT_TYPE" = "dynamic" ]; then ./qtbuild.sh -dynamic $QT_VERSION; else ./qtbuild.sh $QT_VERSION; fi
 RUN tar -C /opt -czf "qt-${QT_VERSION}-${QT_TYPE}.tar.gz" "qt-${QT_VERSION}-${QT_TYPE}"
 
