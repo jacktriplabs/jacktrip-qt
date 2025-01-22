@@ -11,7 +11,7 @@ set -e
 # default versions
 QT_DYNAMIC_BUILD=0
 QT_FULL_VERSION=5.15.13
-OPENSSL_FULL_VERSION=3.1.5
+OPENSSL_FULL_VERSION=3.4.0
 
 # display help information
 qtbuild_help() {
@@ -74,7 +74,7 @@ QT5_FEATURE_OPTIONS="-no-feature-cups -no-feature-ocsp -no-feature-sqlmodel -no-
 QT5_SKIP_OPTIONS="-skip qt3d -skip qtactiveqt -skip qtandroidextras -skip qtcharts -skip qtcoap -skip qtdatavis3d -skip qtdoc -skip qtgamepad -skip qtimageformats -skip qtlocation -skip qtlottie -skip qtmqtt -skip qtmultimedia -skip qtopcua -skip qtpurchasing -skip qtquick3d -skip qtquicktimeline -skip qtscxml -skip qtremoteobjects -skip qtscript -skip qtsensors -skip qtserialbus -skip qtserialport -skip qtspeech -skip qttranslations -skip qtvirtualkeyboard -skip qtwebglplugin -skip qtxmlpatterns"
 QT6_FEATURE_OPTIONS="-no-feature-qtpdf-build -no-feature-qtpdf-quick-build -no-feature-qtpdf-widgets-build -no-feature-printsupport"
 QT6_SKIP_OPTIONS="-skip qtgrpc -skip qtlanguageserver -skip qtquick3dphysics"
-QT_CONFIGURE_OPTIONS="-release -optimize-size -no-pch -nomake tools -nomake tests -nomake examples -opensource -confirm-license -feature-appstore-compliant"
+QT_CONFIGURE_OPTIONS="-release -optimize-size -no-pch -nomake tests -nomake examples -opensource -confirm-license -feature-appstore-compliant"
 QT_LINUX_OPTIONS="-qt-zlib -qt-libpng -qt-libjpeg -system-freetype -fontconfig -qt-pcre -qt-harfbuzz -no-icu -opengl desktop"
 QT_WINDOWS_OPTIONS="-opengl desktop -platform win32-g++ -schannel -no-openssl"
 MAKE_OPTIONS="-j4"
@@ -123,7 +123,7 @@ if [[ ! -d "$QT_SRC_PATH" ]]; then
         QT_ARCHIVE_BASE_NAME=${QT_ARCHIVE_BASE_NAME}opensource-
     fi
     QT_SRC_URL="https://download.qt.io/archive/qt/$QT_MAJOR_VERSION.$QT_MINOR_VERSION/$QT_FULL_VERSION/single/${QT_ARCHIVE_BASE_NAME}src-$QT_FULL_VERSION.tar.xz"
-    curl -L $QT_SRC_URL -o qt.tar.xz
+    curl -k -L $QT_SRC_URL -o qt.tar.xz
     tar -xf qt.tar.xz
 
     if [[ "$OS" == "osx" ]]; then
@@ -197,7 +197,7 @@ if [[ $QT_DYNAMIC_BUILD -ne 1 && "$OS" != "osx" ]]; then
         if [[ ! -d "$OPENSSL_SRC_PATH" ]]; then
             echo "Downloading openssl-${OPENSSL_FULL_VERSION}"
             OPENSSL_SRC_URL="https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_FULL_VERSION}/openssl-${OPENSSL_FULL_VERSION}.tar.gz"
-            curl -L $OPENSSL_SRC_URL -o openssl.tar.xz
+            curl -k -L $OPENSSL_SRC_URL -o openssl.tar.xz
             tar -xf openssl.tar.xz
             mv "openssl-$OPENSSL_FULL_VERSION" $OPENSSL_SRC_PATH
         fi
@@ -205,7 +205,7 @@ if [[ $QT_DYNAMIC_BUILD -ne 1 && "$OS" != "osx" ]]; then
         mkdir $OPENSSL_BUILD_PATH
         mkdir -p openssl-build
         cd openssl-build
-        "$OPENSSL_SRC_PATH/Configure" --prefix=$OPENSSL_BUILD_PATH threads no-shared no-pic no-tests -static
+        "$OPENSSL_SRC_PATH/Configure" --prefix=$OPENSSL_BUILD_PATH threads no-shared no-tests -static -fPIC
         make -j4
         make install_sw
         cd ..
