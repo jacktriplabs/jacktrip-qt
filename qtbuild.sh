@@ -220,6 +220,19 @@ if [[ $QT_DYNAMIC_BUILD -ne 1 && "$OS" != "osx" ]]; then
     cp -r $OPENSSL_BUILD_PATH/include/openssl $QT_BUILD_PATH/include
 fi
 
+if [[ $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -gt 6 ]]; then
+    # exclude qtgraphs
+    QT_CONFIGURE_OPTIONS="$QT_CONFIGURE_OPTIONS -skip qtgraphs"
+    # include linguist
+    QT_CONFIGURE_OPTIONS=$(echo $QT_CONFIGURE_OPTIONS | sed "s,-no-feature-linguist,,")
+    # linguist also seems to fail if cups (or pdf) are disabled
+    # possibly same as https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=271111
+    #QT_CONFIGURE_OPTIONS=$(echo $QT_CONFIGURE_OPTIONS | sed "s,-no-feature-cups,,")
+    QT_CONFIGURE_OPTIONS=$(echo $QT_CONFIGURE_OPTIONS | sed "s,-no-feature-pdf -no-feature-printer -no-feature-printdialog -no-feature-printpreviewdialog -no-feature-printpreviewwidget,-feature-pdf -feature-printer,")
+    QT_CONFIGURE_OPTIONS=$(echo $QT_CONFIGURE_OPTIONS | sed "s,-no-feature-qtpdf-build,,")
+    QT_CONFIGURE_OPTIONS=$(echo $QT_CONFIGURE_OPTIONS | sed "s,-no-feature-printsupport,,")
+fi
+
 # Linux
 if [[ "$OS" == "linux" ]]; then
     if [[ $QT_MAJOR_VERSION -eq 5 ]]; then
