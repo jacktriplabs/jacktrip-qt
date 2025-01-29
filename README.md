@@ -10,20 +10,26 @@ Projects that use these artifacts must adhere to the terms & conditions of the [
 ## Download Links
 
 Mac OS X (Universal)
-* [Qt 6.2.8 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.2.8-dynamic-osx.tar.gz)
-* [Qt 6.2.8 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.8-static-osx.tar.gz)
+* [Qt 6.8.1 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.8.1-dynamic-osx.tar.gz)
+* [Qt 6.8.1 Static](https://files.jacktrip.org/contrib/qt/qt-6.8.1-static-osx.tar.gz)
+* [Qt 6.2.6 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.2.6-dynamic-osx.tar.gz)
+* [Qt 6.2.6 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.6-static-osx.tar.gz)
 * [Qt 5.15.13 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.13-static-osx.tar.gz)
 
 Windows MSVC (64-bit)
+* [Qt 6.8.1 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.8.1-dynamic-win.zip)
+* [Qt 6.8.1 Static](https://files.jacktrip.org/contrib/qt/qt-6.8.1-static-win.zip)
 * [Qt 6.5.3 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.5.3-dynamic-win.zip)
 * [Qt 6.5.3 Static](https://files.jacktrip.org/contrib/qt/qt-6.5.3-static-win.zip)
 * [Qt 5.15.13 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.13-static-win.zip)
 
 Linux (AMD64)
+* [Qt 6.8.1 Static](https://files.jacktrip.org/contrib/qt/qt-6.8.1-static-linux-amd64.tar.gz)
 * [Qt 6.5.3 Static](https://files.jacktrip.org/contrib/qt/qt-6.5.3-static-linux-amd64.tar.gz)
 * [Qt 5.15.13 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.13-static-linux-amd64.tar.gz)
 
 Linux (ARM64)
+* [Qt 6.8.1 Static](https://files.jacktrip.org/contrib/qt/qt-6.8.1-static-linux-arm64.tar.gz)
 * [Qt 6.5.3 Static](https://files.jacktrip.org/contrib/qt/qt-6.5.3-static-linux-arm64.tar.gz)
 * [Qt 5.15.13 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.13-static-linux-arm64.tar.gz)
 
@@ -34,12 +40,12 @@ To build for Linux using Docker:
 
 amd64:
 ```
-docker buildx build --platform linux/amd64 --target=artifact --output type=local,dest=./ --build-arg .
+docker buildx build --platform linux/amd64 --target=artifact --output type=local,dest=./ --build-arg QT_VERSION=6.8.1 .
 ```
 
 arm64
 ```
-docker buildx build --platform linux/arm64 --target=artifact --output type=local,dest=./ --build-arg .
+docker buildx build --platform linux/arm64 --target=artifact --output type=local,dest=./ --build-arg QT_VERSION=6.8.1 .
 ```
 
 arm32:
