@@ -112,8 +112,6 @@ fi
 # Download qt source code
 QT_SRC_PATH="qt-everywhere-src-${QT_FULL_VERSION}"
 if [[ ! -d "$QT_SRC_PATH" ]]; then
-    echo "Downloading qt-${QT_FULL_VERSION}"
-
     QT_ARCHIVE_BASE_NAME=qt-everywhere-
     # filename changed to qt-everywhere-opensource-src-<version> in Qt 5.15.3 and 6.2.5
     if [[ $QT_MAJOR_VERSION -eq 5 && $QT_MINOR_VERSION -eq 15 && $QT_PATCH_VERSION -gt 2 ]]; then
@@ -121,8 +119,13 @@ if [[ ! -d "$QT_SRC_PATH" ]]; then
     fi
     if [[ $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -eq 2 && $QT_PATCH_VERSION -gt 4 ]]; then
         QT_ARCHIVE_BASE_NAME=${QT_ARCHIVE_BASE_NAME}opensource-
+        # an extra "src" subdir was added in 6.2.11
+        if [[ $QT_PATCH_VERSION -gt 10 ]]; then
+            QT_SRC_SUBDIR="src/"
+        fi
     fi
-    QT_SRC_URL="https://download.qt.io/archive/qt/$QT_MAJOR_VERSION.$QT_MINOR_VERSION/$QT_FULL_VERSION/single/${QT_ARCHIVE_BASE_NAME}src-$QT_FULL_VERSION.tar.xz"
+    QT_SRC_URL="https://download.qt.io/archive/qt/${QT_MAJOR_VERSION}.${QT_MINOR_VERSION}/${QT_FULL_VERSION}/${QT_SRC_SUBDIR}single/${QT_ARCHIVE_BASE_NAME}src-${QT_FULL_VERSION}.tar.xz"
+    echo "Downloading qt-${QT_FULL_VERSION} from ${QT_SRC_URL}"
     curl -k -L $QT_SRC_URL -o qt.tar.xz
     tar -xf qt.tar.xz
 
@@ -154,9 +157,11 @@ if [[ ! -d "$QT_SRC_PATH" ]]; then
                 echo "Patching $QT_SRC_PATH for webengine constructors"
                 patch -p1 -d "$QT_SRC_PATH" < "./patches/qt-6.2.5-webengine-constructors.patch"
             elif [[ $QT_PATCH_VERSION -gt 6 ]]; then
-                # QT6.2.7+ on OSX only: patch for OpenGL framework (otherwise not found)
-                echo "Patching $QT_SRC_PATH for OpenGL framework"
-                patch -p1 -d "$QT_SRC_PATH" < "./patches/qt-6.2.x-opengl-framework.patch"
+                if [[ $QT_PATCH_VERSION -lt 11 ]]; then
+                    # QT6.2.7-6.2.10 on OSX only: patch for OpenGL framework (otherwise not found)
+                    echo "Patching $QT_SRC_PATH for OpenGL framework"
+                    patch -p1 -d "$QT_SRC_PATH" < "./patches/qt-6.2.x-opengl-framework.patch"
+                fi
                 # newer python release don't recognize "import imp"
                 # see https://gitlab.alpinelinux.org/alpine/aports/-/issues/16081
                 echo "Patching $QT_SRC_PATH for chromium mojo with newer python"

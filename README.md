@@ -12,6 +12,8 @@ Projects that use these artifacts must adhere to the terms & conditions of the [
 Mac OS X (Universal)
 * [Qt 6.8.1 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.8.1-dynamic-osx.tar.gz)
 * [Qt 6.8.1 Static](https://files.jacktrip.org/contrib/qt/qt-6.8.1-static-osx.tar.gz)
+* [Qt 6.2.11 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.2.11-dynamic-osx.tar.gz)
+* [Qt 6.2.11 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.11-static-osx.tar.gz)
 * [Qt 6.2.6 Dynamic](https://files.jacktrip.org/contrib/qt/qt-6.2.6-dynamic-osx.tar.gz)
 * [Qt 6.2.6 Static](https://files.jacktrip.org/contrib/qt/qt-6.2.6-static-osx.tar.gz)
 * [Qt 5.15.13 Static](https://files.jacktrip.org/contrib/qt/qt-5.15.13-static-osx.tar.gz)

@@ -71,20 +71,20 @@ jobs:
           qt-type: 'static'
           qt-arch: 'linux/arm64'
           is-free: true
-        - name: qt-6.8.1-static-osx
-          runs-on: macos-14
-          qt-version: '6.8.1'
+        - name: qt-6.2.11-static-osx
+          runs-on: macos-13
+          qt-version: '6.2.11'
           qt-type: 'static'
           qt-arch: 'x86_64;arm64'
           is-free: true
-          xcode-directory: /Applications/Xcode_16.2.app
-        - name: qt-6.8.1-dynamic-osx
-          runs-on: macos-14-xlarge
-          qt-version: '6.8.1'
+          xcode-directory: /Applications/Xcode_14.2.app
+        - name: qt-6.2.11-dynamic-osx
+          runs-on: macos-13-xlarge
+          qt-version: '6.2.11'
           qt-type: 'dynamic'
           qt-arch: 'x86_64;arm64'
           is-free: false
-          xcode-directory: /Applications/Xcode_16.2.app
+          xcode-directory: /Applications/Xcode_14.2.app
         - name: qt-6.8.1-static-win
           runs-on: windows-2022
           qt-version: '6.8.1'
