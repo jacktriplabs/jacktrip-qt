@@ -124,6 +124,12 @@ if NOT exist %QT_SRC_PATH%\ (
     unzip -q qt.zip
     :: patch to fix h264 support in chromium
     patch --verbose -u -p 1 -d %QT_SRC_PATH% < patches\qt-win-webengine-h264.patch
+    if %QT_MAJOR_VERSION% EQU 6 (
+        if %QT_MINOR_VERSION% EQU 8 (
+            :: patch to fix missing <string> header in chromium
+            patch --verbose -u -p 1 -d %QT_SRC_PATH% < patches\qt-6.8.x-win-webengine-form-processing.patch
+        )
+    )
 )
 
 :: prepare qt build target

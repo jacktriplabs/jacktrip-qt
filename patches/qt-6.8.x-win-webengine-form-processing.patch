@@ -1,0 +1,10 @@
+--- qtwebengine/src/3rdparty/chromium/components/autofill/core/browser/form_processing/label_processing_util.h	2025-02-06 17:16:19.444161300 -0800
++++ qtwebengine/src/3rdparty/chromium/components/autofill/core/browser/form_processing/label_processing_util_new.h	2025-02-06 14:19:51.411840000 -0800
+@@ -7,6 +7,7 @@
+ 
+ #include <optional>
+ #include <vector>
++#include <string>
+ 
+ #include "base/strings/string_piece.h"
+ 
