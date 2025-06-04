@@ -79,7 +79,7 @@ jobs:
           is-free: true
           xcode-directory: /Applications/Xcode_16.2.app
         - name: qt-6.8.3-dynamic-osx
-          runs-on: macos-14-xlarge
+          runs-on: macos-14-large
           qt-version: '6.8.3'
           qt-type: 'dynamic'
           qt-arch: 'x86_64;arm64'

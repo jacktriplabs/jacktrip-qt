@@ -122,7 +122,19 @@ if NOT exist %QT_SRC_PATH%\ (
     Set QT_SRC_URL=https://download.qt.io/archive/qt/%QT_MAJOR_VERSION%.%QT_MINOR_VERSION%/%QT_FULL_VERSION%/single/!QT_ARCHIVE_BASE_NAME!src-%QT_FULL_VERSION%.zip
     curl -L !QT_SRC_URL! -o qt.zip
     unzip -q qt.zip
+    if %QT_MAJOR_VERSION% EQU 6 (
+        if %QT_MINOR_VERSION% EQU 8 (
+            if %QT_PATCH_VERSION% GTR 2 (
+                :: patch to fix missing <string> headers in webengine / chromium
+                :: see https://bugreports.qt.io/browse/QTBUG-137412
+                patch --verbose -u -p 1 -d %QT_SRC_PATH% < patches\qt-6.8.3-webengine-gfx-win.patch
+                patch --verbose -u -p 1 -d %QT_SRC_PATH% < patches\qt-6.8.3-webengine-label-processing-win.patch
+            )
+        )
+    )
     :: patch to fix h264 support in chromium
+    :: likely no longer required in 6.8.3+
+    :: see https://bugreports.qt.io/browse/QTBUG-117478
     patch --verbose -u -p 1 -d %QT_SRC_PATH% < patches\qt-win-webengine-h264.patch
 )
 
