@@ -132,7 +132,7 @@ jobs:
         if: runner.os == 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free)
         shell: bash
         run: |
-          choco install pkgconfiglite winflexbison3 gperf nodejs-lts python2 python3 nasm StrawberryPerl --no-progress
+          choco install pkgconfiglite winflexbison3 gperf nodejs-lts python2 python311 nasm StrawberryPerl --no-progress
           echo "c:\Program Files\NASM" >> $GITHUB_PATH
       - name: Windows - setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
