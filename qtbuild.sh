@@ -90,7 +90,7 @@ if [[ $QT_DYNAMIC_BUILD -eq 1 ]]; then
     echo "Building dynamic qt-$QT_FULL_VERSION on $OS"
     QT_BUILD_PATH="$QT_BUILD_PATH-dynamic"
     QT_LINUX_OPTIONS="-openssl-runtime $QT_LINUX_OPTIONS"
-    QT_WINDOWS_OPTIONS="-webengine-proprietary-codecs $QT_WINDOWS_OPTIONS"
+    QT_CONFIGURE_OPTIONS="-webengine-proprietary-codecs $QT_CONFIGURE_OPTIONS"
     echo "Please ensure you meet the requirements for building QtWebEngine!"
     echo "See https://doc.qt.io/qt-$QT_MAJOR_VERSION/qtwebengine-platform-notes.html"
 else
