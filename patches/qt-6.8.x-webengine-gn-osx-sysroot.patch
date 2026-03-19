@@ -1,0 +1,10 @@
+--- a/qtwebengine/cmake/Functions.cmake
++++ b/qtwebengine/cmake/Functions.cmake
+@@ -1467,6 +1467,7 @@ macro(qt_webengine_externalproject_add)
+                    -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+                    -DCMAKE_PREFIX_PATH:PATH=<INSTALL_DIR>
+                    -DCMAKE_OSX_ARCHITECTURES=${OSX_ARCH_STR}
++                   -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
+                    -DWEBENGINE_ROOT_BUILD_DIR=${PROJECT_BINARY_DIR}
+                    -DQT_ALLOW_SYMLINK_IN_PATHS=${QT_ALLOW_SYMLINK_IN_PATHS}
+     )

@@ -120,11 +120,11 @@ jobs:
           if [[ -n "${{ matrix.xcode-directory }}" ]]; then
             sudo xcode-select -s ${{ matrix.xcode-directory }}
           fi
-      - name: OSX - setup python
+      - name: Setup python 3.11
         # OSX runners try to use python 3.12 which fails to build webengine
         # See https://bugs.launchpad.net/ubuntu/+source/qtwebengine-opensource-src/+bug/2058117
         # Also https://bugreports.qt.io/browse/QTBUG-124576
-        if: runner.os == 'macOS' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free)
+        if: (runner.os == 'macOS' || runner.os == 'Windows') && (needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free)
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -132,7 +132,7 @@ jobs:
         if: runner.os == 'Windows' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free)
         shell: bash
         run: |
-          choco install pkgconfiglite winflexbison3 gperf nodejs-lts python2 python311 nasm StrawberryPerl --no-progress
+          choco install pkgconfiglite winflexbison3 gperf nodejs-lts python2 nasm StrawberryPerl --no-progress
           echo "c:\Program Files\NASM" >> $GITHUB_PATH
       - name: Windows - setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
@@ -140,6 +140,7 @@ jobs:
       - name: Install python dependencies
         if: runner.os != 'Linux' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free)
         run: |
+          python3 --version
           pip3 install html5lib
       - name: Linux - Log in to Docker Hub
         if: runner.os == 'Linux' && (needs.preflight.outputs.upload_artifact == 'true' || matrix.is-free)
