@@ -135,6 +135,11 @@ if [[ ! -d "$QT_SRC_PATH" ]]; then
             # without it, qt builds fail with undefined symbols due to configure only taking first architecture into account
             echo "Patching $QT_SRC_PATH for osx universal builds with qmake"
             patch -d "$QT_SRC_PATH/qtbase" < "./patches/qt5-osx-configure.json.patch"
+        elif [[ $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -ge 8 ]]; then
+            # QT6.8.x+ on OSX only: fix gn ExternalProject_Add missing CMAKE_OSX_SYSROOT,
+            # which caused gen.py to be invoked with --isysroot but no value
+            echo "Patching $QT_SRC_PATH for webengine gn osx sysroot"
+            patch -p1 -d "$QT_SRC_PATH" < "./patches/qt-6.8.x-webengine-gn-osx-sysroot.patch"
         elif [[ $QT_MAJOR_VERSION -eq 6 && $QT_MINOR_VERSION -eq 2 ]]; then
             if [[ $QT_PATCH_VERSION -eq 4 ]]; then
                 # QT6.2.4 on OSX only: this patch fixes a bug in a third-party dependency of WebEngine
@@ -307,14 +312,15 @@ if [[ "$OS" == "osx" ]]; then
             QT_CONFIGURE_OPTIONS=$(echo $QT_CONFIGURE_OPTIONS | sed "s,-no-feature-printsupport,,")
         fi
         # configure qt for osx
+        CMAKE_OSX_SYSROOT=`xcrun --sdk macosx --show-sdk-path`
         if [[ "x$QT_BUILD_ARCH" == "x" ]]; then
             echo "QT Configure command (NOT universal)"
-            echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_CONFIGURE_OPTIONS"
-            "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_CONFIGURE_OPTIONS
+            echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_CONFIGURE_OPTIONS -- \"-DCMAKE_OSX_SYSROOT=$CMAKE_OSX_SYSROOT\""
+            "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_CONFIGURE_OPTIONS -- "-DCMAKE_OSX_SYSROOT=$CMAKE_OSX_SYSROOT"
         else
             echo "QT Configure command (universal)"
-            echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_CONFIGURE_OPTIONS -- \"-DCMAKE_OSX_ARCHITECTURES=$QT_BUILD_ARCH\""
-            "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_CONFIGURE_OPTIONS -- "-DCMAKE_OSX_ARCHITECTURES=$QT_BUILD_ARCH"
+            echo "\"$QT_SRC_PATH/configure\" -prefix \"$QT_BUILD_PATH\" $QT_CONFIGURE_OPTIONS -- \"-DCMAKE_OSX_ARCHITECTURES=$QT_BUILD_ARCH\" \"-DCMAKE_OSX_SYSROOT=$CMAKE_OSX_SYSROOT\""
+            "$QT_SRC_PATH/configure" -prefix "$QT_BUILD_PATH" $QT_CONFIGURE_OPTIONS -- "-DCMAKE_OSX_ARCHITECTURES=$QT_BUILD_ARCH" "-DCMAKE_OSX_SYSROOT=$CMAKE_OSX_SYSROOT"
         fi
     fi
 fi
